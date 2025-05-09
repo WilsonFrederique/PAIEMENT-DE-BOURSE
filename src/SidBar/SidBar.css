@@ -1,0 +1,12 @@
+.sidebar-logo{
+    width: 43px;
+    margin-top: 0.5em;
+    margin-left: 0.5em;
+    border: 1px solid #ffffff;
+    background: #ffffff55;
+    border-radius: 50%;
+    padding: 0.15em;
+}
+  .special-logo a {
+    color: #fff !important;
+  }

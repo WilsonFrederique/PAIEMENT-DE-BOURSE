@@ -1,0 +1,699 @@
+/* Style gradient moderne avec effets de la sidebar */
+.breadcrumb-container {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-left: 1.3em;
+    margin-top: 1.4em;
+    margin-right: 0.7em;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  body.dark .breadcrumb-container {
+    background: #131c2a74;
+    box-shadow: 0 0 5px #9ca3af69;
+  }
+
+  body.light .breadcrumb-container {
+    background: #fff;
+    box-shadow: 0 0 7px #5a5f6969;
+  }
+  
+  body.dark .breadcrumb-container:hover {
+    background: #131c2a;
+  }
+
+  .h3-title{
+    color: #333;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  body.dark .h3-title{
+    color: #f9f9f9;
+  }
+
+  .h3-title-table{
+    color: #333333d0;
+    font-weight: 400 !important;
+    font-size: 1.3em;
+  }
+
+  body.dark .h3-title-table{
+    color: #f9f9f9;
+  }
+  
+  .breadcrumb-path {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .breadcrumb-step {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .breadcrumb-step:not(:last-child)::after {
+    content: "›";
+    margin: 0 0.5rem;
+    color: #9ca3af;
+    font-size: 1.5rem;
+    font-weight: 300;
+  }
+  
+  body.dark .breadcrumb-step:not(:last-child)::after {
+    color: #f3f4f6b9;
+  }
+  
+  .breadcrumb-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #4b5563;
+  }
+  
+  body.dark .breadcrumb-link {
+    color: #f3f4f690;
+  }
+  
+  .breadcrumb-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: currentColor;
+  }
+  
+  /* Styles pour l'élément actif - avec effet de la sidebar */
+  .breadcrumb-step.active {
+    font-weight: 600;
+    background: #1d293b;
+    color: #fff;
+  }
+  
+  body.dark .breadcrumb-step.active {
+    background: #1d293b;
+    color: #f3f4f6;
+  }
+  
+  body.light .breadcrumb-step.active {
+    background: #f1f0f0;
+    color: blue;
+  }
+  
+  .breadcrumb-step.active .breadcrumb-icon {
+    color: #3b82f6;
+  }
+  
+  /* Effets visuels comme la sidebar */
+  .breadcrumb-step.active {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .breadcrumb-step.active::before {
+    content: '';
+    position: absolute;
+    right: -15px;
+    top: -15px;
+    width: 30px;
+    height: 30px;
+    background-color: transparent;
+    border-radius: 50%;
+    box-shadow: 20px 20px 0 7px #1d293b;
+    pointer-events: none;
+  }
+  
+  .breadcrumb-step.active::after {
+    content: '';
+    position: absolute;
+    right: -15px;
+    bottom: -15px;
+    width: 30px;
+    height: 30px;
+    background-color: transparent;
+    border-radius: 50%;
+    box-shadow: 20px -20px 0 7px #1d293b;
+    pointer-events: none;
+  }
+  
+  body.light .breadcrumb-step.active::before,
+  body.light .breadcrumb-step.active::after {
+    box-shadow: 20px 20px 0 7px #f1f0f0;
+  }
+  
+  /* Désactivation du hover quand l'élément est actif */
+  .breadcrumb-step.active:hover {
+    background: #1d293b !important;
+  }
+
+  .active-txt{
+    color: #f9f9f9;
+  }
+
+  body.light .active-txt{
+    color: #333;
+  }
+  
+  body.light .breadcrumb-step.active:hover {
+    background: #f1f0f0 !important;
+  }
+  
+  /* Animation au hover pour les éléments non actifs */
+  .breadcrumb-step:not(.active):hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* ====================== Place Table =======================  */
+  .title-table{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: -1em !important;
+  }
+
+.detailDonnee{
+    position: relative;
+    width: 100%;
+    padding: 20px;
+    display: grid;
+    grid-gap: 30px;
+  }
+  
+  .detailDonnee .frm{
+    position: relative;
+    display: grid;
+    background: #131c2a74;
+    padding: 20px;
+    box-shadow: 0 0px 7px #ffffff71;
+    border-radius: 20px;
+  }
+  
+  body.light .details .frm{
+    background: #fff;
+    box-shadow: 0 0px 7px #0c006630;
+  }
+  
+  body.light .detailDonnee .frm{
+    background: #fff;
+    box-shadow: 0 0px 7px #09033858;
+  }
+  
+  .details .frm:hover{
+    background: #131c2a !important;
+  }
+  
+  body.light .details .frm:hover{
+    background: #fff !important;
+  }
+  
+  .details .cardHeader{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  
+  body.light .detailDonnee .frm:hover{
+    background: #fff !important;
+  }
+  
+  .detailDonnee .cardHeader{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  /* ======================== TITLE BTN ACTION AJOUT ==================== */
+.action-title {
+    margin: 1.5rem 0;
+  }
+  
+  .action-title button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 
+      0 4px 6px rgba(0, 0, 0, 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.08);
+    z-index: 1;
+  }
+  
+  /* Version dark mode */
+  body.dark .action-title button {
+    background: linear-gradient(135deg, #0d0e72 0%, #160147 100%);
+    box-shadow: 
+      0 4px 6px rgba(0, 0, 0, 0.3),
+      0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Animation de la vague au clic */
+  .action-title button:active {
+    transform: translateY(0) scale(0.98);
+  }
+  
+  /* Effet de lumière dynamique */
+  .action-title button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: 0.5s;
+    z-index: -1;
+  }
+  
+  .action-title button:hover::before {
+    left: 100%;
+  }
+  
+  /* Style de l'icône */
+  .action-title button svg {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+  
+  /* Animation de l'icône au hover */
+  .action-title button:hover svg {
+    transform: scale(1.1) rotate(90deg);
+  }
+  
+  /* Effet de bordure animée */
+  .action-title button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    -webkit-mask: 
+      linear-gradient(#fff 0 0) content-box, 
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .action-title button:hover::after {
+    opacity: 1;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .action-title button {
+      padding: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+    }
+    
+    .action-title button svg {
+      font-size: 1rem;
+    }
+  }
+
+ /* ======================== RECHERCHE ==================== */
+
+ /* Style ultra-moderne pour la barre de recherche */
+.search-table {
+    margin: 1.5rem 0;
+    width: 100%;
+    max-width: 100%;
+    margin-top: -0.1em !important;
+  }
+  
+  .search-table > div {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.05),
+      0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Dark mode */
+  body.dark .search-table > div {
+    background: rgba(30, 41, 59, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.2),
+      0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .search-table svg {
+    position: absolute;
+    left: 16px;
+    color: #64748b;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+  }
+  
+  body.dark .search-table svg {
+    color: #94a3b8;
+  }
+  
+  .search-table input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 3rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1e293b;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+  
+  body.dark .search-table input {
+    color: #f8fafc;
+  }
+  
+  .search-table input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+  }
+  
+  body.dark .search-table input::placeholder {
+    color: #64748b;
+  }
+  
+  /* Effet de focus */
+  .search-table > div:focus-within {
+    transform: translateY(-1px);
+    box-shadow:
+      0 10px 15px rgba(59, 130, 246, 0.1),
+      0 4px 6px rgba(0, 0, 0, 0.05);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+  
+  body.dark .search-table > div:focus-within {
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+  
+  .search-table > div:focus-within svg {
+    color: #3b82f6;
+    transform: scale(1.1);
+  }
+  
+  /* Animation de vague au focus */
+  .search-table input:focus {
+    background: radial-gradient(
+      circle at center,
+      rgba(59, 130, 246, 0.08) 0%,
+      transparent 80%
+    );
+  }
+  
+  .search-table > div:focus-within::after {
+    width: 100%;
+  }
+  
+  /* Animation de l'icône au hover */
+  .search-table svg:hover {
+    transform: scale(1.1);
+    color: #3b82f6;
+    cursor: pointer;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .search-table {
+      max-width: 100%;
+    }
+    
+    .search-table input {
+      padding: 0.8rem 1rem 0.8rem 2.8rem;
+      font-size: 0.9rem;
+    }
+    
+    .search-table svg {
+      left: 14px;
+      font-size: 1.1rem;
+    }
+  }
+
+
+
+
+
+
+
+  /* FRM NIVEAU  */
+
+.niveau-form-card {
+  background: transparent !important;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem 3rem;
+  width: 100%;
+  max-width: 100% !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.niveau-form-card:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.niveau-form-title {
+  margin-bottom: 2.5rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: transparent;
+  background-clip: text;
+}
+
+.title-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.niveau-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.input-field {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.niveau-input {
+  width: 100%;
+  padding: 1rem 0.5rem;
+  font-size: 1rem;
+  border: none;
+  border-bottom: 2px solid #e0e0e0;
+  background-color: transparent;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+body.dark .niveau-input{
+  color: #f9f9f9;
+}
+
+.niveau-input:focus {
+  outline: none;
+  border-bottom-color: transparent;
+}
+
+.niveau-input:focus + .niveau-label,
+.niveau-input:not(:placeholder-shown) + .niveau-label {
+  transform: translateY(-1.8rem) scale(0.85);
+  color: #667eea;
+}
+
+.niveau-label {
+  position: absolute;
+  top: 1rem;
+  left: 0.5rem;
+  color: #999;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.input-border {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.4s ease;
+}
+
+.niveau-input:focus ~ .input-border {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.cancel-action, .submit-action {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  overflow: hidden;
+  position: relative;
+}
+
+.cancel-action {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #6f9ecd2d;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .cancel-action{
+  background: #ffffff23;
+  color: #f9f9f9;
+}
+
+.cancel-action:hover {
+  background-color: #72a3d437;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.cancel-action .action-icon {
+  margin-left: 0.5rem;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.cancel-action:hover .action-icon {
+  transform: translateX(4px);
+}
+
+.submit-action {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.submit-action:hover {
+  transform: translateY(-2px);
+}
+
+.submit-action .action-icon {
+  margin-left: 0.5rem;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.submit-action:hover .action-icon {
+  transform: translateX(4px);
+}
+
+/* Animation des champs */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-field {
+  animation: slideIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+.input-field:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.input-field:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+/* Effet de vague sur les boutons */
+.submit-action::after, .cancel-action::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.submit-action:hover::after, .cancel-action:hover::after {
+  transform: translateY(0);
+}

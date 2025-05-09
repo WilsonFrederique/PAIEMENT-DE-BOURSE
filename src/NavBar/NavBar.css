@@ -1,0 +1,26 @@
+/* Styles pour le theme-toggler */
+.theme-toggler {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .theme-toggler ion-icon {
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+    /* Assurez-vous que les icônes sont toujours visibles */
+    visibility: visible !important;
+    display: block !important;
+  }
+  
+  .theme-toggler ion-icon.active {
+    opacity: 1;
+    color: var(--primary-color); /* Ajoutez une couleur distinctive */
+  }
+  
+  /* Optionnel : styles pour les états hover */
+  .theme-toggler ion-icon:hover {
+    opacity: 0.8;
+  }
