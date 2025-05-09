@@ -64,7 +64,7 @@ const Login = () => {
                             </div>
                         </form>
 
-                        <form action="" className="form sign-up-form">
+                        <form className="form sign-up-form">
                             <h2 className="title-log">S'inscrire</h2>
                             <input style={{ display: 'none' }} className="input" type="text" placeholder="Nom" />
                             <input style={{ display: 'none' }} className='input' type="text" placeholder="Prenom" />
