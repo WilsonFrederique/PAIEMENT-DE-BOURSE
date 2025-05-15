@@ -18,7 +18,7 @@ import { FaRegEye, FaEdit } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import Pagination from "@mui/material/Pagination";
-import { getAllEtudiants, deleteEtudiant, Etudiant } from "../../../services/etudiant_api";
+import { getAllEtudiants, deleteEtudiant, Etudiant, getMineurs } from "../../../services/etudiant_api";
 
 const ComEtudiants = () => {
   const navigate = useNavigate();
@@ -29,6 +29,9 @@ const ComEtudiants = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [etudiantToDelete, setEtudiantToDelete] = useState<string | null>(null);
   const itemsPerPage = 10;
+
+
+  const [showMineursOnly, setShowMineursOnly] = useState(false);
 
   // Charger les étudiants
   useEffect(() => {
@@ -84,11 +87,67 @@ const ComEtudiants = () => {
   };
 
   // Filtrage des données
-  const filteredEtudiants = etudiants.filter(etudiant =>
-    Object.values(etudiant).some(value =>
-      value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    ) // Parenthèse manquante ici
+  const filteredEtudiants = etudiants.filter(etudiant => {
+  if (!etudiant.Matricule) return false; // Ignore les lignes vides
+  
+  const matchesSearch = Object.values(etudiant).some(value =>
+    value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  if (showMineursOnly && etudiant.Naissance) {
+    const dateNaissance = new Date(etudiant.Naissance);
+    const dateMajeure = new Date(dateNaissance);
+    dateMajeure.setFullYear(dateMajeure.getFullYear() + 18);
+    const isMineur = dateMajeure > new Date();
+    return matchesSearch && isMineur;
+  }
+  
+  return matchesSearch;
+});
+
+  // Fonction pour gérer le clic sur le bouton mineur
+ const toggleMineursFilter = async () => {
+  try {
+    if (!showMineursOnly) {
+      let data: Etudiant[];
+      
+      try {
+        // Essayez d'abord la requête API
+        data = await getMineurs();
+      } catch (apiError) {
+        console.warn("Erreur API, filtrage côté client:", apiError);
+        // Fallback: filtre côté client
+        const all = await getAllEtudiants();
+        data = all.filter(e => {
+          if (!e.Naissance) return false;
+          const birthDate = new Date(e.Naissance);
+          const ageDate = new Date();
+          ageDate.setFullYear(ageDate.getFullYear() - 18);
+          return birthDate > ageDate;
+        });
+      }
+      
+      setEtudiants(data);
+      setShowMineursOnly(true);
+      setCurrentPage(1);
+      
+      if (data.length === 0) {
+        toast.info("Aucun étudiant mineur trouvé");
+      } else {
+        toast.success(`${data.length} étudiant(s) mineur(s) trouvé(s)`);
+      }
+    } else {
+      const data = await getAllEtudiants();
+      setEtudiants(data);
+      setShowMineursOnly(false);
+      setCurrentPage(1);
+      toast.success("Affichage de tous les étudiants");
+    }
+  } catch (error) {
+    console.error("Erreur:", error);
+    toast.error(error instanceof Error ? error.message : "Erreur lors du filtrage");
+  }
+};
 
   // Calcul de la pagination
   const totalPages = Math.ceil(filteredEtudiants.length / itemsPerPage);
@@ -197,6 +256,7 @@ const ComEtudiants = () => {
                   <a href="/frmEtudiant"><button><IoMdAdd />Ajouter</button></a>
                 </div>
               </div>
+
               <div className="search-table">
                 <div>
                   <IoSearchOutline />
@@ -208,6 +268,44 @@ const ComEtudiants = () => {
                   />
                 </div>
               </div>
+
+              {/* Section Recherche Avancée */}
+              <div className="advanced-search-container">
+                <div className="search-filters">
+                  <button 
+                    className={`minor-filter-btn ${showMineursOnly ? 'active' : ''}`}
+                    onClick={toggleMineursFilter}
+                  >
+                    <span className="filter-icon">👶</span>
+                    {showMineursOnly ? 'Tous les étudiants' : 'Liste des mineurs'}
+                  </button>
+                  
+                  <div className="custom-select">
+                    <select className="level-select">
+                      <option value="">Tous les niveaux</option>
+                      <option value="L1">Licence 1</option>
+                      <option value="L2">Licence 2</option>
+                      <option value="L3">Licence 3</option>
+                      <option value="M1">Master 1</option>
+                      <option value="M2">Master 2</option>
+                    </select>
+                    <div className="select-arrow">▼</div>
+                  </div>
+                  
+                  <div className="custom-select">
+                    <select className="institution-select">
+                      <option value="">Tous les établissements</option>
+                      <option value="UCAD">UCAD</option>
+                      <option value="UGB">UGB</option>
+                      <option value="UVS">UVS</option>
+                      <option value="ESP">ESP</option>
+                      <option value="ENS">ENS</option>
+                    </select>
+                    <div className="select-arrow">▼</div>
+                  </div>
+                </div>
+              </div>
+
               <div className="table">
                 <table className="table-moderne">
                   <thead className="thead-moderne">

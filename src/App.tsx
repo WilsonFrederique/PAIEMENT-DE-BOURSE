@@ -29,6 +29,7 @@ import FrmNumCompte from './Components/ComFRM/FrmNumCompte/FrmNumCompte';
 
 import Payer from "./PageAdmin/Payer/Payer";
 import FrmPayer from './Components/ComFRM/FrmPayer/FrmPayer';
+import DetailPaiment from './Components/ComFRM/DetailPaiment/DetailPaiment';
 
 import Message from "./PageAdmin/Message/Message";
 
@@ -86,7 +87,7 @@ function App() {
               <Route path="/payer" element={<Payer />} />
               <Route path="/frmPayer" element={<FrmPayer />} />
               <Route path="/modifierFrmPayer/:idPaiement" element={<FrmPayer />} />
-              <Route path="/detailPayer/:idPaiement" element={<FrmPayer />} />
+              <Route path="/detailPayer/:idPaiement" element={<DetailPaiment />} />
 
               <Route path="/message" element={<Message />} />
               <Route path="/parametre" element={<Parametre />} />

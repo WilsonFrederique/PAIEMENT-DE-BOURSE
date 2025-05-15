@@ -122,6 +122,35 @@ export async function getEtudiant(Matricule: string): Promise<Etudiant> {
 }
 
 
+// Obtenir les étudiants mineurs
+export async function getMineurs(): Promise<Etudiant[]> {
+  try {
+    const response = await axios.get<Etudiant[]>(
+      `${API_BASE_URL}/etudiants/mineurs`
+    );
+    
+    console.log('Réponse des mineurs:', response.data); // Log pour débogage
+    
+    // Retourne toujours un tableau, même vide
+    return response.data || [];
+    
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Erreur API mineurs:', error.response?.data);
+      // Si le serveur retourne un tableau vide (status 200)
+      if (error.response?.status === 200) {
+        return [];
+      }
+      throw new Error(
+        error.response?.data?.error || "Erreur lors de la récupération des mineurs"
+      );
+    }
+    console.error('Erreur inattendue:', error);
+    throw new Error("Erreur inattendue");
+  }
+}
+
+
 // Ajoutez cette fonction à la fin du fichier etudiant_api.ts
 export async function checkEtudiantExists(Matricule: string): Promise<boolean> {
   try {
