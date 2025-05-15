@@ -1,140 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Button,
+  Pagination
+} from '@mui/material';
 import NavBar from "../../../NavBar/NavBar";
 import "./ComPayer.css";
 import { GoMoveToTop } from "react-icons/go";
 import { RiHomeLine } from "react-icons/ri";
 import { MdOutlinePayment } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
-import { FaRegEye } from "react-icons/fa";
+import { FaRegEye, FaEdit } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
-import { FaEdit } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
-import Pagination from "@mui/material/Pagination";
-
-interface Student {
-  idpaye: string;
-  matricule: string;
-  anneeUniv: string;
-  dateTime: string;
-  nombreMois: string;
-}
+import { 
+  getAllPaiements, 
+  deletePaiement,
+  Paiement 
+} from "../../../services/paiement_api";
 
 const ComPayer = () => {
   const navigate = useNavigate();
-  const [activeCrumb, setActiveCrumb] = useState("etudiant");
+  const [activeCrumb, setActiveCrumb] = useState("payer");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [paiements, setPaiements] = useState<Paiement[]>([]);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [paiementToDelete, setPaiementToDelete] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 10;
 
-  // Données factices des étudiants (15 exemples)
-  const studentsData: Student[] = [
-    {
-      idpaye: '1',
-      matricule: 'E202501',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '2',
-      matricule: 'E202502',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '3',
-      matricule: 'E202503',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '4',
-      matricule: 'E202504',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '5',
-      matricule: 'E202505',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '6',
-      matricule: 'E202506',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '7',
-      matricule: 'E202507',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '8',
-      matricule: 'E202508',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '9',
-      matricule: 'E202509',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '10',
-      matricule: 'E202510',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '11',
-      matricule: 'E202511',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '12',
-      matricule: 'E202512',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '13',
-      matricule: 'E202513',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '14',
-      matricule: 'E202514',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
-    },
-    {
-      idpaye: '15',
-      matricule: 'E202515',
-      anneeUniv: '2024 - 2025',
-      dateTime: '01/05/2025 - 10:30',
-      nombreMois: '3'
+  // Charger les paiements
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllPaiements();
+        setPaiements(data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des paiements:", error);
+        toast.error("Erreur lors du chargement des paiements");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Gestion de la suppression
+  const handleDeleteClick = (idPaiement: number) => {
+    setPaiementToDelete(idPaiement);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!paiementToDelete) return;
+    
+    try {
+      await deletePaiement(paiementToDelete);
+      toast.success("Paiement supprimé avec succès");
+      // Recharger la liste après suppression
+      const data = await getAllPaiements();
+      setPaiements(data);
+    } catch (error) {
+      console.error("Erreur lors de la suppression du paiement:", error);
+      toast.error(error instanceof Error ? error.message : "Erreur lors de la suppression");
+    } finally {
+      setOpenDeleteDialog(false);
+      setPaiementToDelete(null);
     }
-  ];
+  };
+
+  const handleCancelDelete = () => {
+    setOpenDeleteDialog(false);
+    setPaiementToDelete(null);
+  };
 
   const handleCrumbClick = (path: string, crumbName: string) => {
     setActiveCrumb(crumbName);
@@ -146,26 +91,74 @@ const ComPayer = () => {
     setCurrentPage(value);
   };
 
-  const filteredStudents = studentsData.filter(student =>
-    Object.values(student).some(value =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+  // Formater la date pour l'affichage
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR') + ' - ' + date.toLocaleTimeString('fr-FR');
+  };
+
+  // Filtrage des données
+  const filteredPaiements = paiements.filter(paiement =>
+    Object.values(paiement).some(value =>
+      value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
   // Calcul de la pagination
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredPaiements.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentStudents = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
+  const currentPaiements = filteredPaiements.slice(indexOfFirstItem, indexOfLastItem);
 
   // Créer un tableau avec toujours 10 éléments
-  const displayData = [...currentStudents];
+  const displayData = [...currentPaiements];
   while (displayData.length < itemsPerPage) {
-    displayData.push(null);
+    displayData.push({} as Paiement);
   }
 
   return (
     <div className="container">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
+      {/* Dialog de confirmation de suppression */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCancelDelete}
+        aria-labelledby="alert-dialog-title"
+        classes={{ paper: 'delete-confirmation-dialog' }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="dialog-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+          Êtes-vous sûr de vouloir supprimer ce paiement ?
+        </DialogTitle>
+        <DialogActions>
+          <Button className="cancel-btn" onClick={handleCancelDelete}>
+            Annuler
+          </Button>
+          <Button className="confirm-btn" onClick={handleConfirmDelete} autoFocus>
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <div className="main">
         {/* Nav Bar */}
         <div className="Nav bar">
@@ -192,9 +185,9 @@ const ComPayer = () => {
                     <RiHomeLine className="breadcrumb-icon" />
                     <span>Accueil</span>
                   </a>
-                </li>                
+                </li>
                 <li 
-                  className={`breadcrumb-step ${activeCrumb === "etudiant" ? "active" : ""}`}
+                  className={`breadcrumb-step ${activeCrumb === "payer" ? "active" : ""}`}
                   onClick={() => handleCrumbClick("/payer", "payer")}
                 >
                   <a 
@@ -216,7 +209,7 @@ const ComPayer = () => {
               <div className="title-table">
                 <h3 className="h3-title-table">Liste des paiements</h3>
                 <div className="action-title">
-                  <a href="/frmPayer"><button><IoMdAdd /> Ajouter</button></a>
+                  <a href="/frmPayer"><button><IoMdAdd />Ajouter</button></a>
                 </div>
               </div>
               <div className="search-table">
@@ -234,8 +227,10 @@ const ComPayer = () => {
                 <table className="table-moderne">
                   <thead className="thead-moderne">
                     <tr className="tr-moderne">
-                      <th>ID</th>
-                      <th>Numéro de compte</th>
+                      <th>Num compte</th>
+                      <th>Matricule</th>
+                      <th>Nom</th>
+                      <th>Prénom</th>
                       <th>Année universitaire</th>
                       <th>Date et heure</th>
                       <th>Nombre de mois</th>
@@ -243,32 +238,44 @@ const ComPayer = () => {
                     </tr>
                   </thead>
                   <tbody className="tbody-moderne">
-                    {displayData.map((row, index) => (
-                      <tr key={row?.matricule || `empty-${index}`} className="tr-moderne">
-                        {row ? (
-                          <>
-                            <td>{row.idpaye}</td>
-                            <td>{row.matricule}</td>
-                            <td>{row.anneeUniv}</td>
-                            <td>{row.dateTime}</td>
-                            <td>{row.nombreMois}</td>
-                            <td className="action-td">
-                              <button className="btn-detail"><FaRegEye /></button>
-                              <button className="btn-edit"><FaEdit /></button>
-                              <button className="btn-delete"><MdDeleteOutline /></button>
-                            </td>
-                          </>
-                        ) : (
-                          // Ligne vide
-                          <>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                          </>
-                        )}
+                    {displayData.map((paiement, index) => (
+                      <tr key={paiement?.idPaiement || `empty-${index}`} className="tr-moderne">
+                        <td>{paiement?.NumeroCompte || '-'}</td>
+                        <td>{paiement?.Matricule || '-'}</td>
+                        <td>{paiement?.Nom || '-'}</td>
+                        <td>{paiement?.Prenom || '-'}</td>
+                        <td>{paiement?.AnneeUniversitaire || '-'}</td>
+                        <td>{paiement?.DateHeur ? formatDate(paiement.DateHeur) : '-'}</td>
+                        <td>{paiement?.NombreMois || '-'}</td>
+                        <td className="action-td">
+                          {paiement?.idPaiement ? (
+                            <>
+                              <button 
+                                className="btn-detail"
+                                onClick={() => navigate(`/detailPayer/${paiement.idPaiement}`)}
+                                aria-label="Voir les détails"
+                              >
+                                <FaRegEye className="eye-icon" />
+                              </button>
+                              <button 
+                                className="btn-edit"
+                                onClick={() => navigate(`/modifierFrmPayer/${paiement.idPaiement}`)}
+                              >
+                                <FaEdit />
+                              </button>
+                              <button 
+                                className="btn-delete"
+                                onClick={() => handleDeleteClick(paiement.idPaiement)}
+                              >
+                                <MdDeleteOutline />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              -
+                            </>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
