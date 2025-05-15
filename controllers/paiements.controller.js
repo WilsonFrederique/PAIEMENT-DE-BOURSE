@@ -181,10 +181,15 @@ async function getOne(req, res) {
     const { idPaiement } = req.params;
 
     const [result] = await pool.query(`
-      SELECT p.*, n.NumeroCompte, e.Matricule, e.Nom, e.Prenom
+      SELECT p.*, 
+             n.NumeroCompte, 
+             e.Matricule, e.Nom, e.Prenom, e.Sexe, e.Telephone, 
+             e.Email, e.Etablissement, e.Naissance, e.Img,
+             niv.Niveau
       FROM paiements p
       JOIN tablenumcomptes n ON p.idNumCompte = n.idNumCompte
       JOIN etudiants e ON n.Matricule = e.Matricule
+      LEFT JOIN niveaux niv ON e.idNiveau = niv.idNiveau
       WHERE p.idPaiement = ?`,
       [idPaiement]
     );
@@ -196,7 +201,8 @@ async function getOne(req, res) {
     // Formater la date pour l'affichage
     const paiementFormate = {
       ...result[0],
-      DateHeur: result[0].DateHeur ? new Date(result[0].DateHeur).toISOString() : null
+      DateHeur: result[0].DateHeur ? new Date(result[0].DateHeur).toISOString() : null,
+      Naissance: result[0].Naissance ? new Date(result[0].Naissance).toISOString().split('T')[0] : null
     };
 
     return res.status(200).json(paiementFormate);
