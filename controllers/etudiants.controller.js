@@ -185,6 +185,31 @@ async function getOne(req, res) {
   }
 }
 
+// 👶 Obtenir les étudiants mineurs
+async function getMineurs(req, res) {
+  try {
+    const [result] = await pool.query(`
+      SELECT e.*, n.Niveau 
+      FROM etudiants e
+      LEFT JOIN niveaux n ON e.idNiveau = n.idNiveau
+      WHERE DATE_ADD(e.Naissance, INTERVAL 18 YEAR) > CURDATE()
+      ORDER BY e.Nom, e.Prenom
+    `);
+    
+    console.log('Mineurs trouvés:', result.length); // Log pour débogage
+    
+    // Toujours retourner un tableau, même vide
+    return res.status(200).json(result);
+    
+  } catch (error) {
+    console.error("Erreur dans getMineurs:", error);
+    return res.status(500).json({ 
+      error: "Erreur serveur lors de la récupération des mineurs",
+      details: error.message 
+    });
+  }
+}
+
 export default {
   create,
   updateOne,
@@ -192,4 +217,5 @@ export default {
   getAllEtudiants,
   getAllNiveaux,
   getOne,
+  getMineurs,
 };
