@@ -100,13 +100,13 @@ async function deleteOne(req, res) {
   }
 }
 
-// 📄 Lister tous les numéros de compte
 async function getAll(req, res) {
   try {
     const [result] = await pool.query(`
-      SELECT n.*, e.Nom, e.Prenom 
+      SELECT n.*, e.Nom, e.Prenom, e.idNiveau, l.Niveau
       FROM tablenumcomptes n
       LEFT JOIN etudiants e ON n.Matricule = e.Matricule
+      LEFT JOIN niveaux l ON e.idNiveau = l.idNiveau
       ORDER BY e.Nom, e.Prenom
     `);
     return res.status(200).json(result);
