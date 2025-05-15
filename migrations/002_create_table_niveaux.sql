@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS niveaux (
+    idNiveau VARCHAR(5) PRIMARY KEY,
+    Niveau VARCHAR(50)
+);
