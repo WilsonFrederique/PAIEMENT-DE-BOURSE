@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import NavBar from "../../../NavBar/NavBar";
-import "./ComMontants.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import { GoMoveToTop } from "react-icons/go";
 import { RiHomeLine } from "react-icons/ri";
 import { BiMoney } from "react-icons/bi";
@@ -10,72 +11,68 @@ import { IoSearchOutline } from "react-icons/io5";
 import { FaEdit } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import Pagination from "@mui/material/Pagination";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogTitle from "@mui/material/DialogTitle";
 
-interface Student {
-  idmontant: string;
-  niveau: string;
-  montant: string;
-  equipement: string;
-}
+import { getAllMontants, deleteMontant } from "../../../services/montant_api";
+import type { Montant } from "../../../services/montant_api";
+
+import NavBar from "../../../NavBar/NavBar";
 
 const ComMontants = () => {
   const navigate = useNavigate();
-  const [activeCrumb, setActiveCrumb] = useState("etudiant");
+  const [activeCrumb, setActiveCrumb] = useState("montant");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [montants, setMontants] = useState<Montant[]>([]);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [montantToDelete, setMontantToDelete] = useState<string | null>(null);
   const itemsPerPage = 5;
 
-  // Données factices des étudiants (15 exemples)
-  const studentsData: Student[] = [
-    {
-      idmontant: 'M00000001',
-      niveau: 'L1',
-      montant: '25.000 Ar',
-      equipement: '6.5000 Ar'
-    },
-    {
-      idmontant: 'M00000002',
-      niveau: 'L2',
-      montant: '29.000 Ar',
-      equipement: '6.5000 Ar'
-    },
-    {
-      idmontant: 'M00000003',
-      niveau: 'L3',
-      montant: '35.000 Ar',
-      equipement: '6.5000 Ar'
-    },
-    {
-      idmontant: 'M00000004',
-      niveau: 'M1',
-      montant: '40.000 Ar',
-      equipement: '6.5000 Ar'
-    },
-    {
-      idmontant: 'M00000005',
-      niveau: 'M2',
-      montant: '50.000 Ar',
-      equipement: '6.5000 Ar'
-    },
-    {
-      idmontant: 'M00000006',
-      niveau: 'M3',
-      montant: '60.000 Ar',
-      equipement: '6.5000 Ar'
-    },
-    {
-      idmontant: 'M00000007',
-      niveau: 'M4',
-      montant: '70.000 Ar',
-      equipement: '6.5000 Ar'
-    },
-    {
-      idmontant: 'M00000008',
-      niveau: 'M5',
-      montant: '100.000 Ar',
-      equipement: '6.5000 Ar'
+  // Charger les montants
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAllMontants();
+        setMontants(data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des montants :", error);
+        toast.error("Erreur lors du chargement des montants");
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Gestion de la suppression
+  const handleDeleteClick = (idMontant: string) => {
+    setMontantToDelete(idMontant);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!montantToDelete) return;
+    
+    try {
+      await deleteMontant(montantToDelete);
+      toast.success("Montant supprimé avec succès");
+      // Recharger la liste après suppression
+      const data = await getAllMontants();
+      setMontants(data);
+    } catch (error) {
+      console.error("Erreur lors de la suppression du montant :", error);
+      toast.error(error instanceof Error ? error.message : "Erreur lors de la suppression");
+    } finally {
+      setOpenDeleteDialog(false);
+      setMontantToDelete(null);
     }
-  ];
+  };
+
+  const handleCancelDelete = () => {
+    setOpenDeleteDialog(false);
+    setMontantToDelete(null);
+  };
 
   const handleCrumbClick = (path: string, crumbName: string) => {
     setActiveCrumb(crumbName);
@@ -87,26 +84,62 @@ const ComMontants = () => {
     setCurrentPage(value);
   };
 
-  const filteredStudents = studentsData.filter(student =>
-    Object.values(student).some(value =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+  // Filtrage des données
+  const filteredMontants = montants.filter(montant =>
+    Object.values(montant).some(value =>
+      value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
   // Calcul de la pagination
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredMontants.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentStudents = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Créer un tableau avec toujours 10 éléments
-  const displayData = [...currentStudents];
-  while (displayData.length < itemsPerPage) {
-    displayData.push(null);
-  }
+  const currentMontants = filteredMontants.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="container">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
+      {/* Dialog de confirmation de suppression */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCancelDelete}
+        aria-labelledby="alert-dialog-title"
+        classes={{ paper: 'delete-confirmation-dialog' }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="dialog-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+          Êtes-vous sûr de vouloir supprimer ce montant ?
+        </DialogTitle>
+        <DialogActions>
+          <Button className="cancel-btn" onClick={handleCancelDelete}>
+            Annuler
+          </Button>
+          <Button className="confirm-btn" onClick={handleConfirmDelete} autoFocus>
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <div className="main">
         {/* Nav Bar */}
         <div className="Nav bar">
@@ -132,6 +165,19 @@ const ComMontants = () => {
                   >
                     <RiHomeLine className="breadcrumb-icon" />
                     <span>Accueil</span>
+                  </a>
+                </li>
+                <li 
+                  className={`breadcrumb-step ${activeCrumb === "parametres" ? "active" : ""}`}
+                  onClick={() => handleCrumbClick("/parametre", "parametres")}
+                >
+                  <a 
+                    href="#" 
+                    className="breadcrumb-link"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <RiHomeLine className="breadcrumb-icon" />
+                    <span>Paramètres</span>
                   </a>
                 </li>
                 <li 
@@ -178,34 +224,31 @@ const ComMontants = () => {
                       <th>ID Montant</th>
                       <th>Niveau</th>
                       <th>Montant</th>
-                      <th>équipements</th>
+                      <th>Équipement</th>
                       <th className="action">Action</th>
                     </tr>
                   </thead>
                   <tbody className="tbody-moderne">
-                    {displayData.map((row, index) => (
-                      <tr key={row?.idmontant || `empty-${index}`} className="tr-moderne">
-                        {row ? (
-                          <>
-                            <td>{row.idmontant}</td>
-                            <td>{row.niveau}</td>
-                            <td>{row.montant}</td>
-                            <td>{row.equipement}</td>
-                            <td className="action-td">
-                              <button className="btn-edit"><FaEdit /></button>
-                              <button className="btn-delete"><MdDeleteOutline /></button>
-                            </td>
-                          </>
-                        ) : (
-                          // Ligne vide
-                          <>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                          </>
-                        )}
+                    {currentMontants.map((montant) => (
+                      <tr key={montant.idMontant} className="tr-moderne">
+                        <td>{montant.idMontant}</td>
+                        <td>{montant.Niveau || montant.idNiveau}</td>
+                        <td>{montant.Montant}</td>
+                        <td>{montant.Equipement}</td>
+                        <td className="action-td">
+                          <a 
+                            href={`/modifierFrmMontant/${montant.idMontant}`}
+                            className="btn-edit"
+                          >
+                            <FaEdit />
+                          </a>
+                          <button 
+                            className="btn-delete" 
+                            onClick={() => handleDeleteClick(montant.idMontant)}
+                          >
+                            <MdDeleteOutline />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

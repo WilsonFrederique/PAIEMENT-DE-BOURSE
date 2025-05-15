@@ -1,204 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Button
+} from '@mui/material';
 import NavBar from "../../../NavBar/NavBar";
 import "./ComEtudiants.css";
 import { GoMoveToTop } from "react-icons/go";
 import { RiHomeLine } from "react-icons/ri";
 import { CiUser } from "react-icons/ci";
 import { IoMdAdd } from "react-icons/io";
-import { FaRegEye } from "react-icons/fa";
+import { FaRegEye, FaEdit } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
-import { FaEdit } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import Pagination from "@mui/material/Pagination";
-
-interface Student {
-  matricule: string;
-  nom: string;
-  prenom: string;
-  sexe: string;
-  dateNaissance: string;
-  contact: string;
-  mail: string;
-  etablissement: string;
-  niveau: string;
-}
+import { getAllEtudiants, deleteEtudiant, Etudiant } from "../../../services/etudiant_api";
 
 const ComEtudiants = () => {
   const navigate = useNavigate();
   const [activeCrumb, setActiveCrumb] = useState("etudiant");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [etudiants, setEtudiants] = useState<Etudiant[]>([]);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [etudiantToDelete, setEtudiantToDelete] = useState<string | null>(null);
   const itemsPerPage = 10;
 
-  // Données factices des étudiants (15 exemples)
-  const studentsData: Student[] = [
-    {
-      matricule: 'E202501',
-      nom: 'Mensah',
-      prenom: 'David',
-      sexe: 'Masculin',
-      dateNaissance: '2000-03-12',
-      contact: '+228 90123456',
-      mail: 'mensah.david@example.com',
-      etablissement: 'Université de Lomé',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202502',
-      nom: 'Akou',
-      prenom: 'Linda',
-      sexe: 'Féminin',
-      dateNaissance: '1999-11-05',
-      contact: '+228 90234567',
-      mail: 'linda.akou@example.com',
-      etablissement: 'Institut National Polytechnique',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202503',
-      nom: 'Kodjo',
-      prenom: 'Samuel',
-      sexe: 'Masculin',
-      dateNaissance: '2001-07-22',
-      contact: '+228 90345678',
-      mail: 'samuel.kodjo@example.com',
-      etablissement: 'École Supérieure de Commerce',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202504',
-      nom: 'Gbeassor',
-      prenom: 'Afi',
-      sexe: 'Féminin',
-      dateNaissance: '2000-05-18',
-      contact: '+228 90456789',
-      mail: 'afi.gbeassor@example.com',
-      etablissement: 'Université de Kara',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202505',
-      nom: 'Agbeko',
-      prenom: 'Koffi',
-      sexe: 'Masculin',
-      dateNaissance: '1999-09-30',
-      contact: '+228 90567890',
-      mail: 'koffi.agbeko@example.com',
-      etablissement: 'Université de Lomé',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202506',
-      nom: 'Doe',
-      prenom: 'John',
-      sexe: 'Masculin',
-      dateNaissance: '2000-01-15',
-      contact: '+228 90678901',
-      mail: 'john.doe@example.com',
-      etablissement: 'Institut National Polytechnique',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202507',
-      nom: 'Smith',
-      prenom: 'Jane',
-      sexe: 'Féminin',
-      dateNaissance: '2001-02-20',
-      contact: '+228 90789012',
-      mail: 'jane.smith@example.com',
-      etablissement: 'École Supérieure de Commerce',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202508',
-      nom: 'Johnson',
-      prenom: 'Mike',
-      sexe: 'Masculin',
-      dateNaissance: '1999-12-10',
-      contact: '+228 90890123',
-      mail: 'mike.johnson@example.com',
-      etablissement: 'Université de Kara',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202509',
-      nom: 'Williams',
-      prenom: 'Sarah',
-      sexe: 'Féminin',
-      dateNaissance: '2000-08-25',
-      contact: '+228 90901234',
-      mail: 'sarah.williams@example.com',
-      etablissement: 'Université de Lomé',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202510',
-      nom: 'Brown',
-      prenom: 'David',
-      sexe: 'Masculin',
-      dateNaissance: '2001-04-05',
-      contact: '+228 90012345',
-      mail: 'david.brown@example.com',
-      etablissement: 'Institut National Polytechnique',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202511',
-      nom: 'Davis',
-      prenom: 'Emily',
-      sexe: 'Féminin',
-      dateNaissance: '1999-07-15',
-      contact: '+228 90123456',
-      mail: 'emily.davis@example.com',
-      etablissement: 'École Supérieure de Commerce',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202512',
-      nom: 'Wilson',
-      prenom: 'Robert',
-      sexe: 'Masculin',
-      dateNaissance: '2000-10-30',
-      contact: '+228 90234567',
-      mail: 'robert.wilson@example.com',
-      etablissement: 'Université de Kara',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202513',
-      nom: 'Lee',
-      prenom: 'Jennifer',
-      sexe: 'Féminin',
-      dateNaissance: '2001-03-22',
-      contact: '+228 90345678',
-      mail: 'jennifer.lee@example.com',
-      etablissement: 'Université de Lomé',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202514',
-      nom: 'Taylor',
-      prenom: 'Thomas',
-      sexe: 'Masculin',
-      dateNaissance: '1999-06-18',
-      contact: '+228 90456789',
-      mail: 'thomas.taylor@example.com',
-      etablissement: 'Institut National Polytechnique',
-      niveau: 'L1'
-    },
-    {
-      matricule: 'E202515',
-      nom: 'Anderson',
-      prenom: 'Jessica',
-      sexe: 'Féminin',
-      dateNaissance: '2000-09-08',
-      contact: '+228 90567890',
-      mail: 'jessica.anderson@example.com',
-      etablissement: 'École Supérieure de Commerce',
-      niveau: 'L1'
+  // Charger les étudiants
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAllEtudiants();
+        setEtudiants(data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des étudiants:", error);
+        toast.error("Erreur lors du chargement des étudiants");
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Gestion de la suppression
+  const handleDeleteClick = (matricule: string) => {
+    setEtudiantToDelete(matricule);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!etudiantToDelete) return;
+    
+    try {
+      await deleteEtudiant(etudiantToDelete);
+      toast.success("Étudiant supprimé avec succès");
+      // Recharger la liste après suppression
+      const data = await getAllEtudiants();
+      setEtudiants(data);
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'étudiant:", error);
+      toast.error(error instanceof Error ? error.message : "Erreur lors de la suppression");
+    } finally {
+      setOpenDeleteDialog(false);
+      setEtudiantToDelete(null);
     }
-  ];
+  };
+
+  const handleCancelDelete = () => {
+    setOpenDeleteDialog(false);
+    setEtudiantToDelete(null);
+  };
 
   const handleCrumbClick = (path: string, crumbName: string) => {
     setActiveCrumb(crumbName);
@@ -210,26 +83,67 @@ const ComEtudiants = () => {
     setCurrentPage(value);
   };
 
-  const filteredStudents = studentsData.filter(student =>
-    Object.values(student).some(value =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
+  // Filtrage des données
+  const filteredEtudiants = etudiants.filter(etudiant =>
+    Object.values(etudiant).some(value =>
+      value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    ) // Parenthèse manquante ici
   );
 
   // Calcul de la pagination
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredEtudiants.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentStudents = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
+  const currentEtudiants = filteredEtudiants.slice(indexOfFirstItem, indexOfLastItem);
 
   // Créer un tableau avec toujours 10 éléments
-  const displayData = [...currentStudents];
+  const displayData = [...currentEtudiants];
   while (displayData.length < itemsPerPage) {
-    displayData.push(null);
+    displayData.push({} as Etudiant);
   }
-
   return (
     <div className="container">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
+      {/* Dialog de confirmation de suppression */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCancelDelete}
+        aria-labelledby="alert-dialog-title"
+        classes={{ paper: 'delete-confirmation-dialog' }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="dialog-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+          Êtes-vous sûr de vouloir supprimer cet étudiant ?
+        </DialogTitle>
+        <DialogActions>
+          <Button className="cancel-btn" onClick={handleCancelDelete}>
+            Annuler
+          </Button>
+          <Button className="confirm-btn" onClick={handleConfirmDelete} autoFocus>
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <div className="main">
         {/* Nav Bar */}
         <div className="Nav bar">
@@ -302,49 +216,51 @@ const ComEtudiants = () => {
                       <th>Nom</th>
                       <th>Prénom</th>
                       <th>Sexe</th>
-                      {/* <th>Date de naissance</th> */}
                       <th>Contact</th>
-                      {/* <th>Mail</th> */}
                       <th>Établissement</th>
                       <th>Niveau</th>
                       <th className="action">Action</th>
                     </tr>
                   </thead>
                   <tbody className="tbody-moderne">
-                    {displayData.map((row, index) => (
-                      <tr key={row?.matricule || `empty-${index}`} className="tr-moderne">
-                        {row ? (
-                          <>
-                            <td>{row.matricule}</td>
-                            <td>{row.nom}</td>
-                            <td>{row.prenom}</td>
-                            <td>{row.sexe}</td>
-                            {/* <td>{row.dateNaissance}</td> */}
-                            <td>{row.contact}</td>
-                            {/* <td>{row.mail}</td> */}
-                            <td>{row.etablissement}</td>
-                            <td>{row.niveau}</td>
-                            <td className="action-td">
-                              <button className="btn-detail"><FaRegEye /></button>
-                              <button className="btn-edit"><FaEdit /></button>
-                              <button className="btn-delete"><MdDeleteOutline /></button>
-                            </td>
-                          </>
-                        ) : (
-                          // Ligne vide
-                          <>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            {/* <td>&nbsp;</td> */}
-                            <td>&nbsp;</td>
-                            {/* <td>&nbsp;</td> */}
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                          </>
-                        )}
+                    {displayData.map((etudiant, index) => (
+                      <tr key={etudiant?.Matricule || `empty-${index}`} className="tr-moderne">
+                        <td>{etudiant?.Matricule || '-'}</td>
+                        <td>{etudiant?.Nom || '-'}</td>
+                        <td>{etudiant?.Prenom || '-'}</td>
+                        <td>{etudiant?.Sexe ? (etudiant.Sexe === 'M' ? 'Masculin' : 'Féminin') : '-'}</td>
+                        <td>{etudiant?.Telephone || '-'}</td>
+                        <td>{etudiant?.Etablissement || '-'}</td>
+                        <td>{etudiant?.Niveau || '-'}</td>
+                        <td className="action-td">
+                          {etudiant?.Matricule ? (
+                            <>
+                              <button 
+                                className="btn-detail"
+                                onClick={() => navigate(`/detailEtudiant/${etudiant.Matricule}`)}
+                                aria-label="Voir les détails"
+                              >
+                                <FaRegEye className="eye-icon" />
+                              </button>
+                              <button 
+                                className="btn-edit"
+                                onClick={() => navigate(`/modifierEtudiant/${etudiant.Matricule}`)}
+                              >
+                                <FaEdit />
+                              </button>
+                              <button 
+                                className="btn-delete"
+                                onClick={() => handleDeleteClick(etudiant.Matricule)}
+                              >
+                                <MdDeleteOutline />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              -
+                            </>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
