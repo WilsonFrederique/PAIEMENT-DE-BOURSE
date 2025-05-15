@@ -834,3 +834,86 @@ body.dark .custom-select-dropdown li.disabled-option:hover{
     font-size: 0.8rem;
   }
 }
+
+
+
+
+
+/* Select NumCompt  */
+/* Styles pour la liste déroulante des comptes */
+.custom-select-dropdown {
+  position: absolute;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 5px;
+  padding: 0;
+  list-style: none;
+}
+
+.compte-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.compte-item:hover {
+  background-color: #f8fafc;
+}
+
+.compte-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.compte-num {
+  font-weight: 600;
+  color: #3a61ed;
+}
+
+.compte-matricule {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.compte-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.compte-nom {
+  font-weight: 500;
+}
+
+.compte-niveau {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 3px;
+}
+
+/* Style pour le champ de recherche */
+.custom-select-container {
+  position: relative;
+}
+
+.custom-select-container input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.custom-select-container input:focus {
+  outline: none;
+  border-color: #3a61ed;
+  box-shadow: 0 0 0 2px rgba(58, 97, 237, 0.2);
+}

@@ -647,11 +647,11 @@ const FrmPayer = () => {
                                 {/* NumCompte et AnnéeUniver  */}
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label htmlFor="idNumCompte" className="form-label">
-                                            Numéro de compte
-                                        </label>
-                                        <div className="custom-select-container">
-                                            <input
+                                            <label htmlFor="idNumCompte" className="form-label">
+                                                Numéro de compte
+                                            </label>
+                                            <div className="custom-select-container">
+                                                <input
                                                 type="text"
                                                 id="idNumCompte"
                                                 className="form-input"
@@ -660,21 +660,31 @@ const FrmPayer = () => {
                                                 placeholder="Rechercher un numéro de compte..."
                                                 disabled={isEditMode}
                                                 required
-                                            />
-                                            {!isEditMode && searchInput && filteredNumComptes.length > 0 && (
+                                                />
+                                                {!isEditMode && searchInput && filteredNumComptes.length > 0 && (
                                                 <ul className="custom-select-dropdown">
                                                     {filteredNumComptes.map(compte => (
-                                                        <li 
-                                                            key={compte.idNumCompte} 
-                                                            onClick={() => handleSelectCompte(compte)}
-                                                        >
-                                                            {compte.NumeroCompte} - {compte.Matricule} ({compte.Nom} {compte.Prenom})
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            )}
-                                        </div>
-                                    </div>
+                                                    <li 
+                                                        key={compte.idNumCompte} 
+                                                        onClick={() => handleSelectCompte(compte)}
+                                                        className="compte-item"
+                                                    >
+                                                        <div className="compte-info">
+                                                        <span className="compte-num">{compte.NumeroCompte}</span>
+                                                        <span className="compte-matricule">{compte.Matricule}</span>
+                                                        </div>
+                                                        <div className="compte-details">
+                                                        <span className="compte-nom">{compte.Nom} {compte.Prenom}</span>
+                                                        {compte.Niveau && (
+                                                            <span className="compte-niveau">Niveau: {compte.Niveau}</span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</div>
 
                                     <div className="form-group">
                                         <label htmlFor="AnneeUniversitaire" className="form-label">

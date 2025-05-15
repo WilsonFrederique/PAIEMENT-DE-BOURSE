@@ -25,6 +25,7 @@ export interface NumCompte {
   Matricule: string;
   Nom: string;
   Prenom: string;
+  Niveau?: string;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:4040/api";
