@@ -10,6 +10,13 @@ export interface Paiement {
   Matricule?: string;
   Nom?: string;
   Prenom?: string;
+  Sexe?: string;
+  Telephone?: string;
+  Email?: string;
+  Etablissement?: string;
+  Naissance?: string;
+  Img?: string;
+  Niveau?: string;
 }
 
 export interface NumCompte {
