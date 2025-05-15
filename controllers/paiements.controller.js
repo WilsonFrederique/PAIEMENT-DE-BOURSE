@@ -184,12 +184,14 @@ async function getOne(req, res) {
       SELECT p.*, 
              n.NumeroCompte, 
              e.Matricule, e.Nom, e.Prenom, e.Sexe, e.Telephone, 
-             e.Email, e.Etablissement, e.Naissance, e.Img,
-             niv.Niveau
+             e.Email, e.Etablissement, e.Naissance, e.Img, e.idNiveau,
+             niv.Niveau,
+             m.Montant as montantMensuel, m.Equipement
       FROM paiements p
       JOIN tablenumcomptes n ON p.idNumCompte = n.idNumCompte
       JOIN etudiants e ON n.Matricule = e.Matricule
       LEFT JOIN niveaux niv ON e.idNiveau = niv.idNiveau
+      LEFT JOIN montants m ON e.idNiveau = m.idNiveau
       WHERE p.idPaiement = ?`,
       [idPaiement]
     );
@@ -198,7 +200,7 @@ async function getOne(req, res) {
       return res.status(404).json({ error: "Paiement non trouvé" });
     }
 
-    // Formater la date pour l'affichage
+    // Formater les dates pour l'affichage
     const paiementFormate = {
       ...result[0],
       DateHeur: result[0].DateHeur ? new Date(result[0].DateHeur).toISOString() : null,
