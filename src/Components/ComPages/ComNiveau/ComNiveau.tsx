@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import NavBar from "../../../NavBar/NavBar";
-import "./ComNiveau.css";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import { GoMoveToTop } from "react-icons/go";
 import { RiHomeLine } from "react-icons/ri";
 import { BiMoney } from "react-icons/bi";
@@ -10,54 +11,68 @@ import { IoSearchOutline } from "react-icons/io5";
 import { FaEdit } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import Pagination from "@mui/material/Pagination";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogTitle from "@mui/material/DialogTitle";
 
-interface Student {
-  idniveau: string;
-  niveau: string;
-}
+import { getAllNiveaux, deleteNiveau } from "../../../services/niveaux_api";
+import type { Niveau } from "../../../services/niveaux_api";
+
+import NavBar from "../../../NavBar/NavBar";
 
 const ComNiveau = () => {
   const navigate = useNavigate();
-  const [activeCrumb, setActiveCrumb] = useState("etudiant");
+  const [activeCrumb, setActiveCrumb] = useState("niveau");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [niveaux, setNiveaux] = useState<Niveau[]>([]);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [niveauToDelete, setNiveauToDelete] = useState<string | null>(null);
   const itemsPerPage = 5;
 
-  // Données factices des étudiants (15 exemples)
-  const studentsData: Student[] = [
-    {
-      idniveau: 'N00000001',
-      niveau: 'L1'
-    },
-    {
-      idniveau: 'N00000002',
-      niveau: 'L2'
-    },
-    {
-      idniveau: 'N00000003',
-      niveau: 'L3'
-    },
-    {
-      idniveau: 'N00000004',
-      niveau: 'M1'
-    },
-    {
-      idniveau: 'N00000005',
-      niveau: 'M2'
-    },
-    {
-      idniveau: 'N00000006',
-      niveau: 'M3'
-    },
-    {
-      idniveau: 'N00000007',
-      niveau: 'M4'
-    },
-    {
-      idniveau: 'N00000008',
-      niveau: 'M5'
+  // Charger les niveaux
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAllNiveaux();
+        setNiveaux(data);
+      } catch (error) {
+        console.error("Erreur lors du chargement des niveaux :", error);
+        toast.error("Erreur lors du chargement des niveaux");
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Gestion de la suppression
+  const handleDeleteClick = (idNiveau: string) => {
+    setNiveauToDelete(idNiveau);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!niveauToDelete) return;
+    
+    try {
+      await deleteNiveau(niveauToDelete);
+      toast.success("Niveau supprimé avec succès");
+      // Recharger la liste après suppression
+      const data = await getAllNiveaux();
+      setNiveaux(data);
+    } catch (error) {
+      console.error("Erreur lors de la suppression du niveau :", error);
+      toast.error(error instanceof Error ? error.message : "Erreur lors de la suppression");
+    } finally {
+      setOpenDeleteDialog(false);
+      setNiveauToDelete(null);
     }
-  ];
+  };
+
+  const handleCancelDelete = () => {
+    setOpenDeleteDialog(false);
+    setNiveauToDelete(null);
+  };
 
   const handleCrumbClick = (path: string, crumbName: string) => {
     setActiveCrumb(crumbName);
@@ -69,26 +84,62 @@ const ComNiveau = () => {
     setCurrentPage(value);
   };
 
-  const filteredStudents = studentsData.filter(student =>
-    Object.values(student).some(value =>
+  // Filtrage des données
+  const filteredNiveaux = niveaux.filter(niveau =>
+    Object.values(niveau).some(value =>
       value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
   // Calcul de la pagination
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredNiveaux.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentStudents = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Créer un tableau avec toujours 10 éléments
-  const displayData = [...currentStudents];
-  while (displayData.length < itemsPerPage) {
-    displayData.push(null);
-  }
+  const currentNiveaux = filteredNiveaux.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="container">
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+
+      {/* Dialog de confirmation de suppression */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={handleCancelDelete}
+        aria-labelledby="alert-dialog-title"
+        classes={{ paper: 'delete-confirmation-dialog' }}
+      >
+        <DialogTitle id="alert-dialog-title">
+          <div className="dialog-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 8V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+          Êtes-vous sûr de vouloir supprimer ce niveau ?
+        </DialogTitle>
+        <DialogActions>
+          <Button className="cancel-btn" onClick={handleCancelDelete}>
+            Annuler
+          </Button>
+          <Button className="confirm-btn" onClick={handleConfirmDelete} autoFocus>
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <div className="main">
         {/* Nav Bar */}
         <div className="Nav bar">
@@ -170,31 +221,30 @@ const ComNiveau = () => {
                 <table className="table-moderne">
                   <thead className="thead-moderne">
                     <tr className="tr-moderne">
-                      <th>ID Niveaux</th>
-                      <th>Niveaux</th>
+                      <th>ID Niveau</th>
+                      <th>Niveau</th>
                       <th className="action">Action</th>
                     </tr>
                   </thead>
                   <tbody className="tbody-moderne">
-                    {displayData.map((row, index) => (
-                      <tr key={row?.idniveau || `empty-${index}`} className="tr-moderne">
-                        {row ? (
-                          <>
-                            <td>{row.idniveau}</td>
-                            <td>{row.niveau}</td>
-                            <td className="action-td">
-                              <button className="btn-edit"><FaEdit /></button>
-                              <button className="btn-delete"><MdDeleteOutline /></button>
-                            </td>
-                          </>
-                        ) : (
-                          // Ligne vide
-                          <>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                          </>
-                        )}
+                    {currentNiveaux.map((niveau) => (
+                      <tr key={niveau.idNiveau} className="tr-moderne">
+                        <td>{niveau.idNiveau}</td>
+                        <td>{niveau.Niveau}</td>
+                        <td className="action-td">
+                          <a 
+                            href={`/modifierFrmNiveau/${niveau.idNiveau}`}
+                            className="btn-edit"
+                          >
+                            <FaEdit />
+                          </a>
+                          <button 
+                            className="btn-delete" 
+                            onClick={() => handleDeleteClick(niveau.idNiveau)}
+                          >
+                            <MdDeleteOutline />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
