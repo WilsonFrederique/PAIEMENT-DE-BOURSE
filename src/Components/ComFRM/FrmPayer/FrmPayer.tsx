@@ -25,6 +25,13 @@ interface FormData {
   NombreMois: number;
 }
 
+interface Conflict {
+  date: string;
+  mois: string;
+  idPaiement?: number;
+  anneeUniversitaire: string;
+}
+
 const FrmPayer = () => {
     const navigate = useNavigate();
     const { idPaiement } = useParams();
@@ -44,7 +51,8 @@ const FrmPayer = () => {
     const [searchInput, setSearchInput] = useState("");
     const [filteredNumComptes, setFilteredNumComptes] = useState<NumCompte[]>([]);
     const [selectedCompte, setSelectedCompte] = useState<NumCompte | null>(null);
-    const [conflitsPaiement, setConflitsPaiement] = useState<string[]>([]);
+    const [conflitsPaiement, setConflitsPaiement] = useState<Conflict[]>([]);
+    const [hasConflits, setHasConflits] = useState(false);
 
     function getDefaultAnneeUniversitaire() {
       const currentYear = new Date().getFullYear();
@@ -56,6 +64,14 @@ const FrmPayer = () => {
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
       return `${day}/${month}/${year}`;
+    };
+
+    const getMonthName = (monthIndex: number) => {
+      const months = [
+        'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+        'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+      ];
+      return months[monthIndex];
     };
 
     useEffect(() => {
@@ -74,8 +90,9 @@ const FrmPayer = () => {
 
     useEffect(() => {
       const checkConflitsPaiement = async () => {
-        if (!formData.idNumCompte || !formData.DateHeur || !formData.NombreMois) {
+        if (!formData.idNumCompte || !formData.DateHeur || !formData.NombreMois || !formData.AnneeUniversitaire) {
           setConflitsPaiement([]);
+          setHasConflits(false);
           return;
         }
 
@@ -84,7 +101,6 @@ const FrmPayer = () => {
           const nouvelleDate = new Date(formData.DateHeur);
           const nbMois = formData.NombreMois;
           
-          // Générer les mois concernés par le nouveau paiement
           const moisConcernes: Date[] = [];
           for (let i = 0; i < nbMois; i++) {
             const date = new Date(nouvelleDate);
@@ -92,21 +108,21 @@ const FrmPayer = () => {
             moisConcernes.push(date);
           }
           
-          // Vérifier les conflits avec les paiements existants
-          const conflits: string[] = [];
+          const conflits: Conflict[] = [];
           
           paiements.forEach(p => {
-            if (!p.DateHeur) return;
+            // Ignorer le paiement actuel en mode édition
+            if (isEditMode && p.idPaiement === Number(idPaiement)) return;
+            
+            if (!p.DateHeur || p.AnneeUniversitaire !== formData.AnneeUniversitaire) return;
             
             const datePaiementExist = new Date(p.DateHeur);
             const nbMoisExist = p.NombreMois;
             
-            // Générer les mois concernés par le paiement existant
             for (let i = 0; i < nbMoisExist; i++) {
               const dateExist = new Date(datePaiementExist);
               dateExist.setMonth(dateExist.getMonth() - i);
               
-              // Vérifier si ce mois existe dans les mois concernés par le nouveau paiement
               const existeConflit = moisConcernes.some(m => 
                 m.getMonth() === dateExist.getMonth() && 
                 m.getFullYear() === dateExist.getFullYear()
@@ -114,34 +130,51 @@ const FrmPayer = () => {
               
               if (existeConflit) {
                 const dateStr = formatDate(dateExist);
-                if (!conflits.includes(dateStr)) {
-                  conflits.push(dateStr);
+                const moisStr = `${getMonthName(dateExist.getMonth())} ${dateExist.getFullYear()}`;
+                
+                if (!conflits.some(c => c.date === dateStr)) {
+                  conflits.push({
+                    date: dateStr,
+                    mois: moisStr,
+                    idPaiement: p.idPaiement,
+                    anneeUniversitaire: p.AnneeUniversitaire
+                  });
                 }
               }
             }
           });
           
           setConflitsPaiement(conflits);
+          setHasConflits(conflits.length > 0);
           
           if (conflits.length > 0) {
-            let message = "Conflit de paiement pour les dates : ";
+            let message = "Conflit de paiement pour les mois : ";
+            const moisConflits = conflits.map(c => c.mois);
             
-            if (conflits.length <= 3) {
-              message += conflits.join(", ");
+            if (moisConflits.length <= 3) {
+              message += moisConflits.join(", ");
             } else {
-              message += `${conflits.slice(0, 3).join(", ")} et ${conflits.length - 3} autres dates`;
+              message += `${moisConflits.slice(0, 3).join(", ")} et ${moisConflits.length - 3} autres`;
             }
             
-            toast.warning(message);
+            toast.warning(message, {
+              autoClose: 8000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            });
           }
           
         } catch (error) {
           console.error("Erreur lors de la vérification des conflits:", error);
+          setConflitsPaiement([]);
+          setHasConflits(false);
         }
       };
       
       checkConflitsPaiement();
-    }, [formData.idNumCompte, formData.DateHeur, formData.NombreMois]);
+    }, [formData.idNumCompte, formData.DateHeur, formData.NombreMois, formData.AnneeUniversitaire, idPaiement, isEditMode]);
 
     useEffect(() => {
       if (idPaiement) {
@@ -251,8 +284,29 @@ const FrmPayer = () => {
         return;
       }
 
-      if (!isEditMode && conflitsPaiement.length > 0) {
-        toast.error("Il existe des conflits avec des paiements existants");
+      if (hasConflits) {
+        toast.error(
+          <div>
+            <h4>Conflits détectés</h4>
+            <p>Il existe des conflits avec des paiements existants pour l'année {formData.AnneeUniversitaire}:</p>
+            <ul>
+              {conflitsPaiement.slice(0, 3).map((conflit, index) => (
+                <li key={index}>
+                  {conflit.date} ({conflit.mois}) {conflit.idPaiement && `- Paiement #${conflit.idPaiement}`}
+                </li>
+              ))}
+              {conflitsPaiement.length > 3 && (
+                <li>et {conflitsPaiement.length - 3} autres conflits...</li>
+              )}
+            </ul>
+            <p>Veuillez ajuster la date, le nombre de mois ou l'année universitaire avant de soumettre.</p>
+          </div>,
+          {
+            autoClose: false,
+            closeOnClick: false,
+            draggable: false,
+          }
+        );
         setLoading(false);
         return;
       }
@@ -267,6 +321,7 @@ const FrmPayer = () => {
           setLoading(false);
           return;
         }
+        
         setOpenConfirmDialog(true);
       } else {
         await createNewPaiement();
@@ -280,26 +335,26 @@ const FrmPayer = () => {
             const formattedDate = dateObj.toISOString().slice(0, 19).replace('T', ' ');
 
             const dataToSend = {
-            idNumCompte: formData.idNumCompte,
-            AnneeUniversitaire: formData.AnneeUniversitaire,
-            DateHeur: formattedDate,
-            NombreMois: formData.NombreMois
+              idNumCompte: formData.idNumCompte,
+              AnneeUniversitaire: formData.AnneeUniversitaire,
+              DateHeur: formattedDate,
+              NombreMois: formData.NombreMois
             };
 
             await createPaiement(dataToSend);
             
             toast.success(
-            <div>
+              <div>
                 <h4>Paiement enregistré avec succès</h4>
                 <div style={{ marginTop: '10px' }}>
-                <p><strong>Date:</strong> {new Date(formData.DateHeur).toLocaleString('fr-FR')}</p>
-                <p><strong>Numéro de compte:</strong> {selectedCompte?.NumeroCompte}</p>
-                <p><strong>Étudiant:</strong> {selectedCompte?.Nom} {selectedCompte?.Prenom}</p>
-                <p><strong>Année universitaire:</strong> {formData.AnneeUniversitaire}</p>
-                <p><strong>Nombre de mois:</strong> {formData.NombreMois}</p>
+                  <p><strong>Date:</strong> {new Date(formData.DateHeur).toLocaleString('fr-FR')}</p>
+                  <p><strong>Numéro de compte:</strong> {selectedCompte?.NumeroCompte}</p>
+                  <p><strong>Étudiant:</strong> {selectedCompte?.Nom} {selectedCompte?.Prenom}</p>
+                  <p><strong>Année universitaire:</strong> {formData.AnneeUniversitaire}</p>
+                  <p><strong>Nombre de mois:</strong> {formData.NombreMois}</p>
                 </div>
-            </div>,
-            {
+              </div>,
+              {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -309,17 +364,17 @@ const FrmPayer = () => {
                 progress: undefined,
                 theme: "colored",
                 onClose: () => navigate("/payer")
-            }
+              }
             );
             
         } catch (err) {
             console.error("Erreur lors de la création du paiement:", err);
             toast.error(
-            <div>
+              <div>
                 <h4>Erreur lors de l'enregistrement</h4>
                 <p>{err instanceof Error ? err.message : "Une erreur inattendue est survenue"}</p>
-            </div>,
-            {
+              </div>,
+              {
                 position: "top-right",
                 autoClose: false,
                 hideProgressBar: false,
@@ -328,10 +383,10 @@ const FrmPayer = () => {
                 draggable: true,
                 progress: undefined,
                 theme: "colored",
-            }
+              }
             );
         }
-        };
+    };
 
     const updateExistingPaiement = async () => {
       try {
@@ -441,10 +496,11 @@ const FrmPayer = () => {
                         </div>
                         {originalData && (
                             <span>
-                                Êtes-vous sûr de vouloir modifier ce paiement ?<br/>
-                                <strong>Année universitaire:</strong> {originalData.AnneeUniversitaire} → {formData.AnneeUniversitaire}<br/>
-                                <strong>Date:</strong> {originalData.DateHeur ? new Date(originalData.DateHeur).toLocaleString('fr-FR') : '-'} → {new Date(formData.DateHeur).toLocaleString('fr-FR')}<br/>
-                                <strong>Nombre de mois:</strong> {originalData.NombreMois} → {formData.NombreMois}
+                                <p>Êtes-vous sûr de vouloir modifier ce paiement ?</p>
+                                <p><strong>Modifications :</strong></p>
+                                <p>Année universitaire: {originalData.AnneeUniversitaire} → {formData.AnneeUniversitaire}</p>
+                                <p>Date: {originalData.DateHeur ? new Date(originalData.DateHeur).toLocaleString('fr-FR') : '-'} → {new Date(formData.DateHeur).toLocaleString('fr-FR')}</p>
+                                <p>Nombre de mois: {originalData.NombreMois} → {formData.NombreMois}</p>
                             </span>
                         )}
                     </DialogTitle>
@@ -525,6 +581,36 @@ const FrmPayer = () => {
                             </h2>
                             
                             <form className="modern-form" onSubmit={handleSubmit}>
+
+                                {/* CONFLIT  */}
+                                {conflitsPaiement.length > 0 && (
+                                    <div className={`conflicts-details conflit-color ${hasConflits ? 'has-conflicts' : ''}`}>
+                                        <p>Mois en conflit pour l'année {formData.AnneeUniversitaire}:</p>
+                                        <ul>
+                                            {conflitsPaiement.slice(0, 5).map((conflit, index) => (
+                                                <li key={index}>
+                                                    {conflit.date} ({conflit.mois}) 
+                                                    {conflit.idPaiement && ` - Paiement #${conflit.idPaiement}`}
+                                                </li>
+                                            ))}
+                                            {conflitsPaiement.length > 5 && (
+                                                <li>et {conflitsPaiement.length - 5} autres...</li>
+                                            )}
+                                        </ul>
+                                        {!isEditMode ? (
+                                            <p className="conflict-warning">
+                                                Ce compte a déjà des paiements pour ces mois à l'année {formData.AnneeUniversitaire}. 
+                                                Veuillez ajuster la date, le nombre de mois ou l'année universitaire.
+                                            </p>
+                                        ) : (
+                                            <p className="conflict-warning">
+                                                Attention : Cette modification crée des conflits avec des paiements existants pour l'année {formData.AnneeUniversitaire}.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Nbr mois et Date paiment  */}
                                 <div className="form-row">
                                     <div className="form-group">
                                         <label htmlFor="NombreMois" className="form-label">
@@ -555,22 +641,10 @@ const FrmPayer = () => {
                                             onChange={handleInputChange}
                                             required
                                         />
-                                        {conflitsPaiement.length > 0 && (
-                                            <div className="conflicts-details">
-                                                <p>Conflits détectés pour les dates :</p>
-                                                <ul>
-                                                    {conflitsPaiement.slice(0, 3).map((date, index) => (
-                                                        <li key={index}>{date}</li>
-                                                    ))}
-                                                    {conflitsPaiement.length > 3 && (
-                                                        <li>et {conflitsPaiement.length - 3} autres dates...</li>
-                                                    )}
-                                                </ul>
-                                            </div>
-                                        )}
                                     </div>                              
-                                </div>
+                                </div>                                
 
+                                {/* NumCompte et AnnéeUniver  */}
                                 <div className="form-row">
                                     <div className="form-group">
                                         <label htmlFor="idNumCompte" className="form-label">
@@ -620,6 +694,7 @@ const FrmPayer = () => {
                                     </div>
                                 </div>
                                 
+                                {/* Btns  */}
                                 <div className="form-actions">
                                     <button 
                                         type="button" 
@@ -633,11 +708,12 @@ const FrmPayer = () => {
                                     <button 
                                       type="submit" 
                                       className="btn submit-btn"
-                                      disabled={loading || (!isEditMode && conflitsPaiement.length > 0)}
+                                      disabled={loading || hasConflits}
                                     >
                                         {loading ? "En cours..." : (isEditMode ? "Modifier" : "Enregistrer")}
                                     </button>
                                 </div>
+                                
                             </form>
                         </div>
                     </div>
