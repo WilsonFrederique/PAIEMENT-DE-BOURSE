@@ -21,9 +21,6 @@ import DetailEtudiant from './Components/ComFRM/DetailEtudiant/DetailEtudiant';
 import Montant from "./PageAdmin/Montant/Etudiant";
 import FrmMontant from './Components/ComFRM/FrmMontant/FrmMontant';
 
-import Niveau from "./PageAdmin/Niveau/Niveau";
-import FrmNiveau from './Components/ComFRM/FrmNiveau/FrmNiveau';
-
 import NumeroCompte from './PageAdmin/NumeroCompte/Niveau';
 import FrmNumCompte from './Components/ComFRM/FrmNumCompte/FrmNumCompte';
 
@@ -34,6 +31,11 @@ import DetailPaiment from './Components/ComFRM/DetailPaiment/DetailPaiment';
 import Message from "./PageAdmin/Message/Message";
 
 import Parametre from "./PageAdmin/Parametre/Parametre";
+
+import Niveau from "./PageAdmin/Niveau/Niveau";
+import FrmNiveau from './Components/ComFRM/FrmNiveau/FrmNiveau';
+
+import ListesUsers from './PageAdmin/ListesUsers/ListesUsers';
 
 // Users 
 import DashbordUser from './PageUsers/Pages/DashbordUser/DashbordUser';
@@ -70,11 +72,7 @@ function App() {
               <Route path="/etudiant" element={<Etudiant />} />
               <Route path="/frmEtudiant" element={<FrmEtudiant />} />
               <Route path="/modifierEtudiant/:matricule" element={<FrmEtudiant />} />
-              <Route path="/detailEtudiant/:matricule" element={<DetailEtudiant />} />
-
-              <Route path="/niveau" element={<Niveau />} />
-              <Route path="/frmNiveau" element={<FrmNiveau />} />
-              <Route path="/modifierFrmNiveau/:idNiveau" element={<FrmNiveau />} />
+              <Route path="/detailEtudiant/:matricule" element={<DetailEtudiant />} />              
 
               <Route path="/numeroCompte" element={<NumeroCompte />} />
               <Route path="/frmNumCompte" element={<FrmNumCompte />} />
@@ -91,7 +89,14 @@ function App() {
               <Route path="/detailPayer/:idPaiement" element={<DetailPaiment />} />
 
               <Route path="/message" element={<Message />} />
+
               <Route path="/parametre" element={<Parametre />} />
+
+              <Route path="/niveau" element={<Niveau />} />
+              <Route path="/frmNiveau" element={<FrmNiveau />} />
+              <Route path="/modifierFrmNiveau/:idNiveau" element={<FrmNiveau />} />
+
+              <Route path="/listesUsers" element={<ListesUsers />} />
             </Route>
             
             {/* Routes protégées pour user */}

@@ -90,10 +90,10 @@ const ComDashboard = () => {
             <div className="card">
               <div>
                 <div className="numbers" data-testid="total-amount">
-                    {loading ? '...' : `Ar ${formatAmount(stats.totalAmount)}`}
+                    {loading ? '...' : `${formatAmount(stats.totalAmount)}`}
                 </div>
 
-                <div className="cardName">Montant Total</div>
+                <div className="cardName">Montant total en Ar</div>
               </div>
               <div className="iconBx">
                 <ion-icon name="cash-outline"></ion-icon>
@@ -112,29 +112,6 @@ const ComDashboard = () => {
               </div>
             </div>
           </div>
-
-          {/* Section supplémentaire pour afficher les paiements par année */}
-          {stats.paymentsByYear.length > 0 && (
-            <div className="yearly-stats">
-              <h3>Paiements par année universitaire</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Année Universitaire</th>
-                    <th>Nombre de Paiements</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.paymentsByYear.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.AnneeUniversitaire}</td>
-                      <td>{item.NombrePaiements}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
 
           {/* Details Section */}
           <div className="details">

@@ -967,6 +967,11 @@ body.dark .setting-item:hover {
   color: #a7a03b;
 }
 
+.user-setting .setting-icon {
+  background: rgba(92, 143, 246, 0.1);
+  color: #ddddd9;
+}
+
 .img-niveau{
   max-width: 100%;
   width: 100%;
@@ -1159,9 +1164,20 @@ body.dark .toggle-label {
   color: #b1af18;
 }
 
+.security-btn.user {
+  width: 100%;
+  background: rgba(59, 115, 246, 0.1);
+  color: #e9e9e4;
+}
+
 .security-btn.niveau:hover {
   background: rgba(232, 243, 148, 0.1);
   color: #8a8813;
+}
+
+.security-btn.user:hover {
+  background: rgba(148, 165, 243, 0.1);
+  color: #c6c6e7;
 }
 
 .security-btn.password:hover {
@@ -1545,4 +1561,32 @@ body.dark .save-changes-btn:hover{
 
 .btn-icon {
   font-size: 16px;
+}
+
+
+
+
+
+
+
+/* Animation de chargement  */
+
+.loading-animation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 20px !important;
+  height: 20px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 50%;
+  border-top-color: #fff !important;
+  animation: spin 1s ease-in-out infinite !important;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg) !important; }
 }

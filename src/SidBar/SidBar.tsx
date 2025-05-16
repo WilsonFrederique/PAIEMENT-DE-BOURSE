@@ -1,18 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SidBar.css';
-import Avatar from '../assets/images/avatar.png';
+import Avatar from '../assets/images/AvatarUser.png';
 import Logo from '../assets/images/Logo.png';
+import { setAuthToken } from '../services/login_api';
+
+interface User {
+  IDLogin?: number;
+  Nom?: string;
+  Prenom?: string;
+  Telephone?: string;
+  Email?: string;
+  Roles?: string;
+  Img?: string | null;
+}
 
 const SidBar = () => {
     const [activeItem, setActiveItem] = useState<string | null>(null);
     const [isHovered, setIsHovered] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Charger l'élément actif du sidebar
         const savedItem = localStorage.getItem('activeSidebarItem');
         if (savedItem) {
             setActiveItem(savedItem);
+        }
+
+        // Charger les informations de l'utilisateur
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+            setUser(JSON.parse(savedUser));
         }
     }, []);
 
@@ -54,6 +74,49 @@ const SidBar = () => {
         }
     };
 
+    // Fonction pour gérer la déconnexion
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        
+        // Animation pendant 2.5 secondes
+        await new Promise(resolve => setTimeout(resolve, 2500));
+        
+        // Supprimer le token et les données utilisateur du localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Supprimer le token des headers axios
+        setAuthToken(null);
+        
+        // Rediriger vers la page de login
+        navigate('/');
+    };
+
+    // Fonction pour obtenir le nom complet de l'utilisateur
+    const getUserName = () => {
+        if (!user) return 'Administrateur';
+        
+        if (user.Prenom && user.Nom) {
+            return `${user.Nom} ${user.Prenom}`;
+        }
+        return user.Prenom || user.Nom || 'Administrateur';
+    };
+
+    // Fonction pour obtenir le rôle formaté
+    const getUserRole = () => {
+        if (!user?.Roles) return 'Administrateur';
+        
+        switch(user.Roles.toLowerCase()) {
+            case 'admin':
+            case 'superadmin':
+                return 'Administrateur';
+            case 'user':
+                return 'Utilisateur';
+            default:
+                return user.Roles;
+        }
+    };
+
     const items = [
         { 
             name: 'logo', 
@@ -65,7 +128,6 @@ const SidBar = () => {
         },
         { name: 'acceuil', icon: 'home-outline', title: 'Tableau de bord' },
         { name: 'etudiant', icon: 'people-outline', title: 'Étudiants' },
-        // { name: 'niveau', icon: 'school-outline', title: 'Niveau' },
         { name: 'compte', icon: 'card-outline', title: 'Numéro de compte' },
         { name: 'montant', icon: 'cash-outline', title: 'Montants' },
         { name: 'payer', icon: 'card-outline', title: 'Paiements' },
@@ -104,16 +166,28 @@ const SidBar = () => {
             <div className='admin-logout-container'>
                 <div className="admin-profile">
                     <div className="profile-photo">
-                        <img src={Avatar} alt="Admin" />
+                        <img 
+                            src={user?.Img || Avatar} 
+                            alt="Admin" 
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = Avatar;
+                            }}
+                        />
                     </div>
                     <div className="admin-info">
-                        <p className="admin-name">Walle Freed</p>
-                        <p className="admin-role">Administrator</p>
+                        <p className="admin-name">{getUserName()}</p>
+                        <p className="admin-role">{getUserRole()}</p>
                     </div>
                 </div>
-                <button className="logout-btn">
+                <button 
+                    className="logout-btn" 
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                >
                     <ion-icon name="log-out-outline"></ion-icon>
                     <span>Déconnexion</span>
+                    {isLoggingOut && <div className="spinner"></div>}
                 </button>
             </div>
         </div>

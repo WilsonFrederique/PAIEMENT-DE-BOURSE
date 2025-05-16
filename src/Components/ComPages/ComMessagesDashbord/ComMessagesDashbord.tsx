@@ -70,7 +70,7 @@ const ComMessagesDashbord = () => {
               <div className="title-table-d">
                 <h3 className="h3-title-table">Liste des messages ({filteredMessages.length})</h3>
                 <div className="action-title">
-                  <button><IoMdAdd /> Ajouter</button>
+                  <button><IoMdAdd /></button>
                 </div>
               </div>
 

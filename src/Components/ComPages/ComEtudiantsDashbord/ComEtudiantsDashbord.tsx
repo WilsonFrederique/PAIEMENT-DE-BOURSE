@@ -249,7 +249,7 @@ const ComEtudiantsDashbord = () => {
           <div className="title-table">
             <h3 className="h3-title-table">Liste des étudiants</h3>
             <div className="action-title">
-              <a href="/frmEtudiant"><button><IoMdAdd />Ajouter</button></a>
+              <a href="/frmEtudiant"><button><IoMdAdd /></button></a>
             </div>
           </div>
 
@@ -317,7 +317,7 @@ const ComEtudiantsDashbord = () => {
           </div>
 
           <table className="table-moderne">
-            <thead className="thead-moderne">
+            <thead className="thead-moderne-d">
               <tr className="tr-moderne">
                 <th>Matricule</th>
                 <th>Nom</th>
