@@ -384,3 +384,68 @@
         left: 50%;
     }
 }
+
+
+
+
+
+
+
+/* ERR EN CSS MODERNE  */
+
+/* Style de base pour les messages d'erreur */
+.error-message {
+  position: relative;
+  width: 60%;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Style spécifique pour les erreurs d'authentification */
+.error-message.auth-error {
+  background-color: #fff5f5;
+  color: #d32f2f;
+  border-left: 4px solid #d32f2f;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.1);
+}
+
+.error-icon {
+  margin-right: 12px;
+  width: 24px;
+  height: 24px;
+  background-color: #d32f2f;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.error-text {
+  flex-grow: 1;
+}
+
+/* Animation pour l'apparition du message */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Style pour le formulaire lors d'une erreur */
+.form.sign-in-form.auth-error {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}

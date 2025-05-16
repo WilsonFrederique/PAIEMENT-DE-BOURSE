@@ -648,7 +648,7 @@
     padding: 1rem !important;
   }
   
-  .btn-edit, .btn-delete, .btn-detail {
+  .btn-edit, .btn-delete, .btn-detail, .btn-imprimer {
     position: relative !important;
     display: flex !important;
     align-items: center !important;
@@ -674,6 +674,16 @@
     background: rgba(113, 35, 147, 0.12) !important;
     color: #460e83 !important;
   }
+
+  .btn-imprimer {
+    background: rgba(32, 163, 193, 0.727)!important;
+    color: #f9f9f9 !important;
+  }
+
+  body.dark .btn-imprimer {
+    background: rgb(4, 80, 97)!important;
+    color: #f9f9f9 !important;
+  }
   
   .btn-delete {
     background: rgba(239, 68, 68, 0.12) !important;
@@ -681,7 +691,7 @@
   }
   
   /* Effet de remplissage au hover */
-  .btn-edit:hover, .btn-detail:hover, .btn-delete:hover {
+  .btn-edit:hover, .btn-detail:hover, .btn-delete:hover, .btn-imprimer:hover {
     transform: translateY(-2px) scale(1.05) !important;
     box-shadow: 
       0 6px 12px rgba(0, 0, 0, 0.15),
@@ -696,12 +706,20 @@
     background: rgba(209, 59, 246, 0.2) !important;
   }
   
+  .btn-imprimer:hover {
+    background: rgba(15, 128, 153, 0.759)!important;
+  }
+  
+  body.dark .btn-imprimer:hover {
+    background: rgb(4, 80, 97)!important;
+  }
+  
   .btn-delete:hover {
     background: rgba(239, 68, 68, 0.2) !important;
   }
   
   /* Animation de la vague */
-  .btn-edit::before, .btn-detail::before, .btn-delete::before {
+  .btn-edit::before, .btn-detail::before, .btn-delete::before, .btn-imprimer::before {
     content: '' !important;
     position: absolute !important;
     top: 0 !important;
@@ -716,8 +734,16 @@
     ) !important;
     transition: 0.5s !important;
   }
+
+  .btn-imprimer-tout{
+    background: rgb(18, 156, 187)!important;
+  }
+
+  body.dark .btn-imprimer-tout{
+    background: rgb(4, 80, 97)!important;
+  }
   
-  .btn-edit:hover::before, .btn-detail:hover::before, .btn-delete:hover::before {
+  .btn-edit:hover::before, .btn-detail:hover::before, .btn-delete:hover::before, .btn-imprimer:hover::before {
     left: 100% !important;
   }
   
@@ -873,4 +899,163 @@ body.dark .tbody-moderne .tr-moderne td:empty {
   background: transparent !important;
   transform: none !important;
   box-shadow: none !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* div-imprimer  */
+
+/* Styles pour la modale d'impression */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.print-modal-content {
+  background-color: #bfbfc0 !important;
+  border-radius: 8px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+}
+
+body.dark .print-modal-content {
+  background-color: #1d293b !important;
+  border-radius: 8px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+}
+
+.print-modal-header {
+  color: rgb(16, 25, 125) !important;
+  text-transform: uppercase;
+  font-size: 1.2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+body.dark .print-modal-header {
+  color: rgb(197, 199, 220) !important;
+  text-transform: uppercase;
+  font-size: 1.2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.print-modal-header h2 {
+  margin: 0;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #601b1b !important;
+}
+
+body.dark .close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #e6e5e5 !important;
+}
+
+.close-modal-btn:hover {
+  color: #b40404 !important;
+}
+
+body.dark .close-modal-btn:hover {
+  color: #f87777 !important;
+}
+
+/* Styles existants pour le contenu du reçu */
+.papier {
+  background: white !important;
+  color: #000000e3;
+  padding: 2em;
+  margin-bottom: 1.5em;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.student-info {
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.th, .td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.total {
+  font-weight: bold;
+  text-align: right;
+  margin-top: 10px;
+}
+
+.print-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.print-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.print-actions button:first-child {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.print-actions button:last-child {
+  background-color: #f44336;
+  color: white;
 }

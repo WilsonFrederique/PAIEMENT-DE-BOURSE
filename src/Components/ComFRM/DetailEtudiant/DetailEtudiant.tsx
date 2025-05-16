@@ -205,7 +205,7 @@ const DetailEtudiant = () => {
                                     </div>
 
                                     {/* Colonne 2 */}
-                                    <div className="detail-column">
+                                    <div className="detail-column d">
                                         <div className="detail-info-group">
                                             <h3 className="info-label">Date de Naissance</h3>
                                             <p className="info-value">
@@ -232,6 +232,11 @@ const DetailEtudiant = () => {
                                         <div className="detail-info-group">
                                             <h3 className="info-label">Niveau</h3>
                                             <p className="info-value">{etudiant.Niveau || '-'}</p>
+                                        </div>
+
+                                        <div className="detail-info-group">
+                                            <h3 className="info-label">Statu</h3>
+                                            <p className="info-value">....................</p>
                                         </div>
                                     </div>
                                 </div>

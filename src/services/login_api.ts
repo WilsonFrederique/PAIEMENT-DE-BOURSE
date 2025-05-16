@@ -200,3 +200,31 @@ export function setAuthToken(token: string | null) {
     delete axios.defaults.headers.common["Authorization"];
   }
 }
+
+
+export async function updateUserImage(
+  id: number,
+  imageData: string,
+  token: string
+): Promise<ApiResponse> {
+  try {
+    const response = await axios.put<ApiResponse>(
+      `${API_BASE_URL}/logins/${id}/image`,
+      { Img: imageData },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        error.response?.data?.message || "Erreur lors de la mise à jour de l'image"
+      );
+    }
+    throw new Error("Erreur inattendue lors de la mise à jour de l'image");
+  }
+}

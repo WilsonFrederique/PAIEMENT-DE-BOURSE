@@ -18,7 +18,7 @@ import { FaRegEye, FaEdit } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import Pagination from "@mui/material/Pagination";
-import { getAllEtudiants, deleteEtudiant, Etudiant } from "../../../services/etudiant_api";
+import { getAllEtudiants, deleteEtudiant, Etudiant, getMineurs, getAllNiveaux, Niveau } from "../../../services/etudiant_api";
 
 const ComEtudiants = () => {
   const navigate = useNavigate();
@@ -30,15 +30,28 @@ const ComEtudiants = () => {
   const [etudiantToDelete, setEtudiantToDelete] = useState<string | null>(null);
   const itemsPerPage = 10;
 
+
+  const [showMineursOnly, setShowMineursOnly] = useState(false);
+
+  const [selectedNiveau, setSelectedNiveau] = useState<string>("");
+
+  const [niveaux, setNiveaux] = useState<Niveau[]>([]);
+
+  const [selectedEtablissement, setSelectedEtablissement] = useState<string>("");
+
   // Charger les étudiants
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllEtudiants();
-        setEtudiants(data);
+        const [etudiantsData, niveauxData] = await Promise.all([
+          getAllEtudiants(),
+          getAllNiveaux()
+        ]);
+        setEtudiants(etudiantsData);
+        setNiveaux(niveauxData);
       } catch (error) {
-        console.error("Erreur lors du chargement des étudiants:", error);
-        toast.error("Erreur lors du chargement des étudiants");
+        console.error("Erreur lors du chargement des données:", error);
+        toast.error("Erreur lors du chargement des données");
       }
     };
     fetchData();
@@ -84,11 +97,99 @@ const ComEtudiants = () => {
   };
 
   // Filtrage des données
-  const filteredEtudiants = etudiants.filter(etudiant =>
-    Object.values(etudiant).some(value =>
+  const filteredEtudiants = etudiants.filter(etudiant => {
+    if (!etudiant.Matricule) return false; // Ignore les lignes vides
+    
+    const matchesSearch = Object.values(etudiant).some(value =>
       value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    ) // Parenthèse manquante ici
-  );
+    );
+    
+    // Filtre par niveau
+    const matchesNiveau = !selectedNiveau || etudiant.idNiveau === selectedNiveau;
+    
+    // Filtre par établissement
+    const matchesEtablissement = !selectedEtablissement || etudiant.Etablissement === selectedEtablissement;
+    
+    if (showMineursOnly && etudiant.Naissance) {
+      const dateNaissance = new Date(etudiant.Naissance);
+      const dateMajeure = new Date(dateNaissance);
+      dateMajeure.setFullYear(dateMajeure.getFullYear() + 18);
+      const isMineur = dateMajeure > new Date();
+      return matchesSearch && matchesNiveau && matchesEtablissement && isMineur;
+    }
+    
+    return matchesSearch && matchesNiveau && matchesEtablissement;
+  });
+
+  const resetFilters = async () => {
+    setSelectedNiveau("");
+    setSelectedEtablissement("");
+    setSearchQuery("");
+    setShowMineursOnly(false);
+    try {
+      const data = await getAllEtudiants();
+      setEtudiants(data);
+      setCurrentPage(1);
+      toast.success("Filtres réinitialisés");
+    } catch (error) {
+      console.error("Erreur lors du chargement des étudiants:", error);
+      toast.error("Erreur lors du chargement des étudiants");
+    }
+  };
+
+  const getUniqueEtablissements = () => {
+    const etablissements = new Set<string>();
+    etudiants.forEach(etudiant => {
+      if (etudiant.Etablissement) {
+        etablissements.add(etudiant.Etablissement);
+      }
+    });
+    return Array.from(etablissements).sort();
+  };
+
+  // Fonction pour gérer le clic sur le bouton mineur
+ const toggleMineursFilter = async () => {
+  try {
+    if (!showMineursOnly) {
+      let data: Etudiant[];
+      
+      try {
+        // Essayez d'abord la requête API
+        data = await getMineurs();
+      } catch (apiError) {
+        console.warn("Erreur API, filtrage côté client:", apiError);
+        // Fallback: filtre côté client
+        const all = await getAllEtudiants();
+        data = all.filter(e => {
+          if (!e.Naissance) return false;
+          const birthDate = new Date(e.Naissance);
+          const ageDate = new Date();
+          ageDate.setFullYear(ageDate.getFullYear() - 18);
+          return birthDate > ageDate;
+        });
+      }
+      
+      setEtudiants(data);
+      setShowMineursOnly(true);
+      setCurrentPage(1);
+      
+      if (data.length === 0) {
+        toast.info("Aucun étudiant mineur trouvé");
+      } else {
+        toast.success(`${data.length} étudiant(s) mineur(s) trouvé(s)`);
+      }
+    } else {
+      const data = await getAllEtudiants();
+      setEtudiants(data);
+      setShowMineursOnly(false);
+      setCurrentPage(1);
+      toast.success("Affichage de tous les étudiants");
+    }
+  } catch (error) {
+    console.error("Erreur:", error);
+    toast.error(error instanceof Error ? error.message : "Erreur lors du filtrage");
+  }
+};
 
   // Calcul de la pagination
   const totalPages = Math.ceil(filteredEtudiants.length / itemsPerPage);
@@ -197,6 +298,7 @@ const ComEtudiants = () => {
                   <a href="/frmEtudiant"><button><IoMdAdd />Ajouter</button></a>
                 </div>
               </div>
+
               <div className="search-table">
                 <div>
                   <IoSearchOutline />
@@ -208,6 +310,59 @@ const ComEtudiants = () => {
                   />
                 </div>
               </div>
+
+              {/* Section Recherche Avancée */}
+              <div className="advanced-search-container">
+                <div className="search-filters">
+                  <button 
+                    className={`minor-filter-btn ${showMineursOnly ? 'active' : ''}`}
+                    onClick={toggleMineursFilter}
+                  >
+                    <span className="filter-icon">👶</span>
+                    {showMineursOnly ? 'Tous les étudiants' : 'Liste des mineurs'}
+                  </button>
+                  
+                  <div className="custom-select">
+                    <select 
+                      className="level-select"
+                      value={selectedNiveau}
+                      onChange={(e) => setSelectedNiveau(e.target.value)}
+                    >
+                      <option value="">Tous les niveaux</option>
+                      {niveaux.map((niveau) => (
+                        <option key={niveau.idNiveau} value={niveau.idNiveau}>
+                          {niveau.Niveau}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="select-arrow">▼</div>
+                  </div>
+                  
+                  <div className="custom-select">
+                    <select 
+                      className="institution-select"
+                      value={selectedEtablissement}
+                      onChange={(e) => setSelectedEtablissement(e.target.value)}
+                    >
+                      <option value="">Tous les établissements</option>
+                      {getUniqueEtablissements().map(etablissement => (
+                        <option key={etablissement} value={etablissement}>
+                          {etablissement}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="select-arrow">▼</div>
+                  </div>
+
+                  <button className="reset-filter-btn" onClick={resetFilters}>
+  <svg className="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+    <path d="M3 3v5h5"/>
+  </svg>
+</button>
+                </div>
+              </div>
+
               <div className="table">
                 <table className="table-moderne">
                   <thead className="thead-moderne">

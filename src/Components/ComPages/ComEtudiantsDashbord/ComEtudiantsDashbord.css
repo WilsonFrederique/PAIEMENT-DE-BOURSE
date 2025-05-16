@@ -513,16 +513,16 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
   }
   
-  .thead-moderne {
-    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%) !important;
-    color: white !important;
+  .thead-moderne-d {
+    background: linear-gradient(135deg, #75a6f63a 0%, #5a8fe43a 100%) !important;
+    color: #fff !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
     font-size: 0.85rem !important;
     letter-spacing: 0.5px !important;
   }
   
-  body.dark .thead-moderne {
+  body.dark .thead-moderne-d {
     background: linear-gradient(135deg, #1013c55e 0%, #3a0ba93d 100%) !important;
   }
   
@@ -530,17 +530,17 @@
     transition: all 0.3s ease !important;
   }
   
-  .thead-moderne .tr-moderne {
+  .thead-moderne-d .tr-moderne {
     border-radius: 16px 16px 0 0 !important;
   }
   
-  .thead-moderne th {
+  .thead-moderne-d th {
     padding: 1.2rem 1rem !important;
     text-align: left !important;
     position: relative !important;
   }
   
-  .thead-moderne th:not(:last-child)::after {
+  .thead-moderne-d th:not(:last-child)::after {
     content: "" !important;
     position: absolute !important;
     right: 0 !important;
@@ -618,7 +618,7 @@
       white-space: nowrap !important;
     }
     
-    .thead-moderne th,
+    .thead-moderne-d th,
     .tbody-moderne td {
       padding: 0.8rem !important;
     }

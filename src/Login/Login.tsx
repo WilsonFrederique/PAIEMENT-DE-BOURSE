@@ -57,9 +57,6 @@ const Login = () => {
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
         
-        // Vérifiez que response.user.Roles existe et a la bonne valeur
-        console.log('User role:', response.user.Roles);
-        
         if (response.user.Roles === 'admin' || response.user.Roles === 'superadmin') {
           navigate('/dashbord');
         } else {
@@ -67,8 +64,15 @@ const Login = () => {
         }
       }
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur inconnue est survenue';
+      setError(errorMessage);
+      
+      // Ajouter une classe d'erreur au formulaire temporairement
+      const form = e.currentTarget as HTMLFormElement;
+      form.classList.add('auth-error');
+      setTimeout(() => form.classList.remove('auth-error'), 1000);
+      
       console.error('Login error:', err);
-      setError(err instanceof Error ? err.message : 'Une erreur inconnue est survenue');
     } finally {
       setLoading(false);
     }
@@ -115,7 +119,12 @@ const Login = () => {
           {/* Formulaire de connexion */}
           <form onSubmit={handleLogin} className="form sign-in-form">
             <h2 className="title-log">Se connecter</h2>
-            {error && <div className="error-message">{error}</div>}
+            {error && (
+              <div className={`error-message ${error.includes('incorrect') ? 'auth-error' : ''}`}>
+                <div className="error-icon">!</div>
+                <div className="error-text">{error}</div>
+              </div>
+            )}
             <div className="input-field-login">
               <i className="fas fa-user"></i>
               <input
@@ -165,7 +174,12 @@ const Login = () => {
           {/* Formulaire d'inscription */}
           <form onSubmit={handleRegister} className="form sign-up-form">
             <h2 className="title-log">S'inscrire</h2>
-            {error && <div className="error-message">{error}</div>}
+            {error && (
+              <div className={`error-message ${error.includes('incorrect') ? 'auth-error' : ''}`}>
+                <div className="error-icon">!</div>
+                <div className="error-text">{error}</div>
+              </div>
+            )}
             <div className="input-field-login">
               <i className="fas fa-phone"></i>
               <input

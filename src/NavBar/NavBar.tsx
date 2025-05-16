@@ -1,25 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import './NavBar.css';
-import Avatar from '../assets/images/avatar.png';
-
-// import { ThemeContext } from '@emotion/react';
-
+import Avatar from '../assets/images/AvatarUser.png';
 import { createContext } from 'react';
 
-// Exportez le contexte pour pouvoir l'utiliser ailleurs
 export const ThemeContext = createContext({
   darkMode: true,
   toggleTheme: () => {}
 });
 
+interface User {
+  IDLogin?: number;
+  Nom?: string;
+  Prenom?: string;
+  Telephone?: string;
+  Email?: string;
+  Roles?: string;
+  Img?: string | null;
+}
+
 const NavBar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   // Charger l'état depuis localStorage au montage
   useEffect(() => {
     const savedState = localStorage.getItem('sidebarState');
     const savedTheme = localStorage.getItem('theme');
+    const savedUser = localStorage.getItem('user');
     
     if (savedState) {
       const isOpen = JSON.parse(savedState);
@@ -31,6 +39,10 @@ const NavBar = () => {
       const isDark = savedTheme === 'dark';
       setDarkMode(isDark);
       toggleThemeClasses(isDark);
+    }
+
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
     }
   }, []);
 
@@ -72,22 +84,45 @@ const NavBar = () => {
     toggleThemeClasses(newDarkMode);
   };
 
-    return (
-      <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
-        <div className="place-nav">
-            <div className="topbar">
-                <div className="toggle" onClick={toggleSidebar}>
-                    <ion-icon name="menu-outline"></ion-icon>
-                </div>
+  // Fonction pour obtenir le nom complet ou le prénom
+  const getUserName = () => {
+    if (!user) return 'Utilisateur';
+    
+    if (user.Prenom) {
+      return `${user.Prenom}`;
+    }
+    return user.Prenom || 'Utilisateur';
+  };
 
-                <div className="search">
+  // Fonction pour obtenir le rôle formaté
+  const getUserRole = () => {
+    if (!user?.Roles) return 'Utilisateur';
+    
+    switch(user.Roles.toLowerCase()) {
+      case 'admin':
+      case 'superadmin':
+        return 'Administrateur';
+      default:
+        return 'Utilisateur';
+    }
+  };
+
+  return (
+    <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
+      <div className="place-nav">
+          <div className="topbar">
+              <div className="toggle" onClick={toggleSidebar}>
+                  <ion-icon name="menu-outline"></ion-icon>
+              </div>
+
+              <div className="search">
                 <label>
                     <input type="text" placeholder="Rechercher..." />
                     <ion-icon name="search-outline"></ion-icon>
                 </label>
-                </div>
+              </div>
 
-                <div className="right-container">
+              <div className="right-container">
                 <div className="right">
                     <div className="top">
                     <button id="menu-btn" onClick={toggleSidebar}>
@@ -99,20 +134,27 @@ const NavBar = () => {
                     </div>
                     <div className="profile">
                         <div className="info">
-                          <p>Bonjour, <b>Fred</b></p>
-                          <small className="text-muted">Administrator</small>
+                          <p>Bonjour, <b>{getUserName()}</b></p>
+                          <small className="text-muted">{getUserRole()}</small>
                         </div>
                         <div className="profile-photo">
-                          <img src={Avatar} alt="Profile" />
+                          <img 
+                            src={user?.Img || Avatar} 
+                            alt="Profile" 
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = Avatar;
+                            }}
+                          />
                         </div>
                     </div>
                     </div>
                 </div>
-                </div>
-            </div>
-        </div>
-      </ThemeContext.Provider>
-    );
+              </div>
+          </div>
+      </div>
+    </ThemeContext.Provider>
+  );
 };
 
 export default NavBar;
