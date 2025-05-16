@@ -272,6 +272,38 @@ async function getByAnneeUniversitaire(req, res) {
   }
 }
 
+async function getDashboardStats(req, res) {
+  try {
+    // Requête pour le nombre total d'étudiants
+    const [studentsResult] = await pool.query(
+      "SELECT COUNT(*) AS totalStudents FROM etudiants"
+    );
+
+    // Requête pour les paiements groupés par année
+    const [paymentsByYear] = await pool.query(
+      "SELECT AnneeUniversitaire, COUNT(*) AS NombrePaiements FROM paiements GROUP BY AnneeUniversitaire"
+    );
+
+    // Requête pour le montant total
+    const [totalAmountResult] = await pool.query(`
+      SELECT 
+          SUM(Montant) + SUM(Equipement) AS TotalGeneral
+      FROM montants
+    `);
+
+    return res.status(200).json({
+      totalStudents: studentsResult[0].totalStudents,
+      totalPayments: paymentsByYear.reduce((acc, curr) => acc + curr.NombrePaiements, 0),
+      totalAmount: totalAmountResult[0].TotalGeneral || 0, // Utilisez TotalGeneral ici
+      paymentsByYear,
+      totalMessages: 0
+    });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des statistiques:", error);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+}
+
 export default {
   create,
   updateOne,
@@ -279,5 +311,6 @@ export default {
   getAll,
   getOne,
   getByNumCompte,
-  getByAnneeUniversitaire
+  getByAnneeUniversitaire,
+  getDashboardStats
 };

@@ -8,6 +8,7 @@ import montantsRoutes from "./routes/montants.routes.js";
 import etudiantsRoutes from "./routes/etudiants.routes.js";
 import tableNumCompteRoutes from "./routes/tableNumComptes.routes.js";
 import paiementsRoutes from "./routes/paiements.routes.js";
+import dashboardRoutes from './routes/dashboard.routes.js';
 
 dotenv.config({ path: ".env" });
 
@@ -30,6 +31,7 @@ app.use("/api", montantsRoutes);
 app.use("/api", etudiantsRoutes);
 app.use("/api", tableNumCompteRoutes);
 app.use("/api", paiementsRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.listen(port, () => {
   console.log(`App listening on http://localhost:${port}`);

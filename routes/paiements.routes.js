@@ -6,6 +6,7 @@ const router = express.Router();
 // Routes de base pour les paiements
 router.get("/paiements/", paiementsController.getAll); 
 router.get("/paiements/:idPaiement", paiementsController.getOne);
+router.get("/paiements/stats/dashboard", paiementsController.getDashboardStats);
 router.post("/paiements/", paiementsController.create); 
 router.put("/paiements/:idPaiement", paiementsController.updateOne);
 router.delete("/paiements/:idPaiement", paiementsController.deleteOne);
