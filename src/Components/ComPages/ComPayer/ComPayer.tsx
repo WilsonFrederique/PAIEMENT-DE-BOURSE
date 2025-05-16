@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -18,9 +18,11 @@ import { IoMdAdd } from "react-icons/io";
 import { FaRegEye, FaEdit } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
+import { ImPrinter } from "react-icons/im";
 import { 
   getAllPaiements, 
   deletePaiement,
+  getPaiement,
   Paiement 
 } from "../../../services/paiement_api";
 
@@ -33,6 +35,10 @@ const ComPayer = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [paiementToDelete, setPaiementToDelete] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedPaiement, setSelectedPaiement] = useState<Paiement | null>(null);
+  const [showPrintView, setShowPrintView] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState<any[]>([]);
+  const printRef = useRef<HTMLDivElement>(null);
   const itemsPerPage = 10;
 
   // Charger les paiements
@@ -52,6 +58,95 @@ const ComPayer = () => {
     fetchData();
   }, []);
 
+  // Gestion de l'impression
+  const handlePrint = () => {
+    if (!printRef.current) return;
+    
+    const printContent = printRef.current.innerHTML;
+    const originalContent = document.body.innerHTML;
+    
+    document.body.innerHTML = printContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    
+    // Recharger la page pour restaurer le comportement normal
+    window.location.reload();
+  };
+
+  const handlePrintClick = async (idPaiement: number) => {
+    try {
+      // Récupérer les détails complets du paiement
+      const paiement = await getPaiement(idPaiement);
+      
+      // Vérifier si les montants sont définis, sinon utiliser des valeurs par défaut
+      const paiementWithDefaults = {
+        ...paiement,
+        MontantEquipement: paiement.Equipement ?? 0,
+        MontantMensuel: paiement.montantMensuel ?? 0
+      };
+      
+      setSelectedPaiement(paiementWithDefaults);
+      
+      // Simuler les détails des mois payés
+      const details = [];
+      if (paiementWithDefaults.DateHeur && paiementWithDefaults.NombreMois > 0) {
+        const months = generatePaymentMonths(paiementWithDefaults.DateHeur, paiementWithDefaults.NombreMois);
+        months.forEach(month => {
+          details.push({
+            mois: month,
+            montant: paiementWithDefaults.MontantMensuel
+          });
+        });
+      }
+      
+      setPaymentDetails(details);
+      setShowPrintView(true);
+    } catch (error) {
+      console.error("Erreur lors de la récupération du paiement:", error);
+      toast.error("Erreur lors de la récupération du paiement");
+    }
+  };
+
+  // Générer les mois de paiement avec année
+  const generatePaymentMonths = (dateString: string, numberOfMonths: number) => {
+    if (!dateString || !numberOfMonths || numberOfMonths <= 0) return [];
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return [];
+    
+    const months = [];
+    const monthNames = [
+      "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+      "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+    ];
+    
+    for (let i = 0; i < numberOfMonths; i++) {
+      const currentDate = new Date(date);
+      currentDate.setMonth(date.getMonth() - i);
+      const monthName = monthNames[currentDate.getMonth()];
+      const year = currentDate.getFullYear();
+      months.push(`${monthName} ${year}`);
+    }
+    
+    return months.reverse();
+  };
+
+  // Calcul du total
+  const calculateTotal = () => {
+    if (!selectedPaiement) return 0;
+    
+    const equipement = selectedPaiement.MontantEquipement || 0;
+    const mensuel = selectedPaiement.MontantMensuel || 0;
+    const nbMois = selectedPaiement.NombreMois || 0;
+    
+    return equipement + (nbMois * mensuel);
+  };
+
+  // Formater les montants
+  const formatMontant = (montant: number) => {
+    return new Intl.NumberFormat('fr-FR').format(montant);
+  };
+
   // Gestion de la suppression
   const handleDeleteClick = (idPaiement: number) => {
     setPaiementToDelete(idPaiement);
@@ -64,7 +159,6 @@ const ComPayer = () => {
     try {
       await deletePaiement(paiementToDelete);
       toast.success("Paiement supprimé avec succès");
-      // Recharger la liste après suppression
       const data = await getAllPaiements();
       setPaiements(data);
     } catch (error) {
@@ -93,8 +187,10 @@ const ComPayer = () => {
 
   // Formater la date pour l'affichage
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR') + ' - ' + date.toLocaleTimeString('fr-FR');
+    if (isNaN(date.getTime())) return 'N/A';
+    return date.toLocaleDateString('fr-FR');
   };
 
   // Filtrage des données
@@ -118,7 +214,6 @@ const ComPayer = () => {
 
   return (
     <div className="container">
-      {/* Toast Container */}
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -132,7 +227,6 @@ const ComPayer = () => {
         theme="colored"
       />
 
-      {/* Dialog de confirmation de suppression */}
       <Dialog
         open={openDeleteDialog}
         onClose={handleCancelDelete}
@@ -160,13 +254,11 @@ const ComPayer = () => {
       </Dialog>
 
       <div className="main">
-        {/* Nav Bar */}
         <div className="Nav bar">
           <NavBar />
         </div>
 
         <div className="container-container">
-          {/* Fil d'ariane */}
           <div className="breadcrumb-container">
             <div>
               <h3 className="h3-title">Paiements</h3>
@@ -203,7 +295,6 @@ const ComPayer = () => {
             </nav>
           </div>
 
-          {/* Table */}
           <div className="detailDonnee">
             <div className="recentOrders">
               <div className="title-table">
@@ -223,12 +314,84 @@ const ComPayer = () => {
                   />
                 </div>
               </div>
+
+              {/* Modale d'impression */}
+              {showPrintView && selectedPaiement && (
+                <div className="modal-overlay" onClick={() => setShowPrintView(false)}>
+                  <div 
+                    className="print-modal-content"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="print-modal-header">
+                      <h2>Reçu de Paiement</h2>
+                      <button 
+                        className="close-modal-btn" 
+                        onClick={() => setShowPrintView(false)}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                    
+                    <div className="papier">
+                      <div className="vrais-imprimer" ref={printRef}>
+                        <div className="header">
+                          <h2>Aujourd'hui le <b>{new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</b></h2>
+                        </div>
+                        
+                        <div className="student-info">
+                          <p><strong>Matricule :</strong> {selectedPaiement.Matricule || 'N/A'}</p>
+                          <p><strong>{selectedPaiement.Nom} {selectedPaiement.Prenom}</strong></p>
+                          <p><strong>Née le :</strong> {selectedPaiement.Naissance ? formatDate(selectedPaiement.Naissance) : 'N/A'}</p>
+                          <p><strong>Sexe :</strong> {selectedPaiement.Sexe || 'N/A'}</p>
+                          <p><strong>Institution :</strong> {selectedPaiement.Etablissement || 'N/A'} / <strong>Niveau :</strong> {selectedPaiement.Niveau || 'N/A'}</p>
+                        </div>
+                        
+                        <table>
+                          <thead>
+                            <tr>
+                              <th className="th">Mois</th>
+                              <th className="th">Montant (Ar)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedPaiement.MontantEquipement > 0 && (
+                              <tr>
+                                <td className="td">Equipement</td>
+                                <td className="td">{formatMontant(selectedPaiement.MontantEquipement)}</td>
+                              </tr>
+                            )}
+                            {paymentDetails.map((detail, index) => (
+                              <tr key={index}>
+                                <td className="td">{detail.mois}</td>
+                                <td className="td">{formatMontant(detail.montant)}</td>
+                              </tr>
+                            ))}
+                            <tr>
+                              <td className="td"><strong>Total</strong></td>
+                              <td className="td"><strong>{formatMontant(calculateTotal())}</strong></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        
+                        <div className="total">
+                          Total Payé : {formatMontant(calculateTotal())} Ariary
+                        </div>
+                      </div>
+                      
+                      <div className="print-actions">
+                        <button onClick={handlePrint}>Imprimer</button>
+                        <button onClick={() => setShowPrintView(false)}>Fermer</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="table">
                 <table className="table-moderne">
                   <thead className="thead-moderne">
                     <tr className="tr-moderne">
                       <th>Num compte</th>
-                      <th>Matricule</th>
                       <th>Nom</th>
                       <th>Prénom</th>
                       <th>Année universitaire</th>
@@ -241,7 +404,6 @@ const ComPayer = () => {
                     {displayData.map((paiement, index) => (
                       <tr key={paiement?.idPaiement || `empty-${index}`} className="tr-moderne">
                         <td>{paiement?.NumeroCompte || '-'}</td>
-                        <td>{paiement?.Matricule || '-'}</td>
                         <td>{paiement?.Nom || '-'}</td>
                         <td>{paiement?.Prenom || '-'}</td>
                         <td>{paiement?.AnneeUniversitaire || '-'}</td>
@@ -250,6 +412,13 @@ const ComPayer = () => {
                         <td className="action-td">
                           {paiement?.idPaiement ? (
                             <>
+                              <button 
+                                className="btn-imprimer"
+                                onClick={() => handlePrintClick(paiement.idPaiement)}
+                                aria-label="Imprimer le reçu"
+                              >
+                                <ImPrinter className="eye-icon" />
+                              </button>
                               <button 
                                 className="btn-detail"
                                 onClick={() => navigate(`/detailPayer/${paiement.idPaiement}`)}
@@ -271,9 +440,7 @@ const ComPayer = () => {
                               </button>
                             </>
                           ) : (
-                            <>
-                              -
-                            </>
+                            <>-</>
                           )}
                         </td>
                       </tr>

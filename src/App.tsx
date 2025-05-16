@@ -85,6 +85,7 @@ function App() {
               <Route path="/modifierFrmMontant/:idMontant" element={<FrmMontant />} />
 
               <Route path="/payer" element={<Payer />} />
+              <Route path="/impression/:idPaiement" element={<Payer />} />
               <Route path="/frmPayer" element={<FrmPayer />} />
               <Route path="/modifierFrmPayer/:idPaiement" element={<FrmPayer />} />
               <Route path="/detailPayer/:idPaiement" element={<DetailPaiment />} />

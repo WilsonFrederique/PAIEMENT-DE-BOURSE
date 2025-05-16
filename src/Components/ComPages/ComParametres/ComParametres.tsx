@@ -370,10 +370,6 @@ const ComParametres = () => {
                             <p>Dernière connexion: Aujourd'hui, 14:30</p>
                           </div>
                         </div>
-                        {/* <button className="edit-profile-btn" onClick={toggleEditProfileModal}>
-                          <span className="btn-icon">✏️</span>
-                          <span>Modifier le profil</span>
-                        </button> */}
 
                         <button className="edit-profile-btn" onClick={toggleEditProfileModal}>
                           Modifier le profil
