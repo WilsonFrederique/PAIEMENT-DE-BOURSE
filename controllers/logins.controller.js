@@ -378,6 +378,53 @@ async function updatePassword(req, res) {
   }
 }
 
+
+// 🖼️ Mettre à jour l'image de profil
+async function updateImage(req, res) {
+  try {
+    const { id } = req.params;
+    const { Img } = req.body;
+
+    if (!Img) {
+      return res.status(400).json({
+        success: false,
+        message: "L'image est requise"
+      });
+    }
+
+    const [result] = await pool.query(
+      "UPDATE logins SET Img = ? WHERE IDLogin = ?",
+      [Img, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Utilisateur non trouvé"
+      });
+    }
+
+    // Récupérer l'utilisateur mis à jour
+    const [users] = await pool.query(
+      "SELECT IDLogin, Nom, Prenom, Email, Roles, Img FROM logins WHERE IDLogin = ?",
+      [id]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Image mise à jour avec succès",
+      data: users[0]
+    });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'image:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Erreur serveur lors de la mise à jour de l'image",
+      error: error.message
+    });
+  }
+}
+
 export default {
   create,
   login,
@@ -385,5 +432,6 @@ export default {
   getById,
   update,
   remove,
-  updatePassword
+  updatePassword,
+  updateImage
 };

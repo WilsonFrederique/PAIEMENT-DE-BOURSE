@@ -11,6 +11,7 @@ router.post("/logins/login", loginsController.login);
 router.get("/logins/", loginsController.getAll);
 router.get("/logins/:id", loginsController.getById);
 router.put("/logins/:id", loginsController.update);
+router.put("/logins/:id/image", loginsController.updateImage);
 router.delete("/logins/:id", loginsController.remove);
 
 // Route spéciale pour la mise à jour du mot de passe
