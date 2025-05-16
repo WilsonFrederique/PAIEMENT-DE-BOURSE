@@ -168,19 +168,6 @@ const ComMontants = () => {
                   </a>
                 </li>
                 <li 
-                  className={`breadcrumb-step ${activeCrumb === "parametres" ? "active" : ""}`}
-                  onClick={() => handleCrumbClick("/parametre", "parametres")}
-                >
-                  <a 
-                    href="#" 
-                    className="breadcrumb-link"
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <RiHomeLine className="breadcrumb-icon" />
-                    <span>Paramètres</span>
-                  </a>
-                </li>
-                <li 
                   className={`breadcrumb-step ${activeCrumb === "montant" ? "active" : ""}`}
                   onClick={() => handleCrumbClick("/montant", "montant")}
                 >

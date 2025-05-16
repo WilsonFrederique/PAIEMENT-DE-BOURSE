@@ -445,6 +445,10 @@
   gap: 1.5rem;
 }
 
+.d{
+  margin-top: 0.8em;
+}
+
 .detail-card {
   background: #f9f9ff;
   border-radius: 0.8rem;

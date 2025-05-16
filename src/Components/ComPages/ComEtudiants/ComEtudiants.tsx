@@ -18,7 +18,7 @@ import { FaRegEye, FaEdit } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import Pagination from "@mui/material/Pagination";
-import { getAllEtudiants, deleteEtudiant, Etudiant, getMineurs } from "../../../services/etudiant_api";
+import { getAllEtudiants, deleteEtudiant, Etudiant, getMineurs, getAllNiveaux, Niveau } from "../../../services/etudiant_api";
 
 const ComEtudiants = () => {
   const navigate = useNavigate();
@@ -33,15 +33,25 @@ const ComEtudiants = () => {
 
   const [showMineursOnly, setShowMineursOnly] = useState(false);
 
+  const [selectedNiveau, setSelectedNiveau] = useState<string>("");
+
+  const [niveaux, setNiveaux] = useState<Niveau[]>([]);
+
+  const [selectedEtablissement, setSelectedEtablissement] = useState<string>("");
+
   // Charger les étudiants
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllEtudiants();
-        setEtudiants(data);
+        const [etudiantsData, niveauxData] = await Promise.all([
+          getAllEtudiants(),
+          getAllNiveaux()
+        ]);
+        setEtudiants(etudiantsData);
+        setNiveaux(niveauxData);
       } catch (error) {
-        console.error("Erreur lors du chargement des étudiants:", error);
-        toast.error("Erreur lors du chargement des étudiants");
+        console.error("Erreur lors du chargement des données:", error);
+        toast.error("Erreur lors du chargement des données");
       }
     };
     fetchData();
@@ -88,22 +98,54 @@ const ComEtudiants = () => {
 
   // Filtrage des données
   const filteredEtudiants = etudiants.filter(etudiant => {
-  if (!etudiant.Matricule) return false; // Ignore les lignes vides
-  
-  const matchesSearch = Object.values(etudiant).some(value =>
-    value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  if (showMineursOnly && etudiant.Naissance) {
-    const dateNaissance = new Date(etudiant.Naissance);
-    const dateMajeure = new Date(dateNaissance);
-    dateMajeure.setFullYear(dateMajeure.getFullYear() + 18);
-    const isMineur = dateMajeure > new Date();
-    return matchesSearch && isMineur;
-  }
-  
-  return matchesSearch;
-});
+    if (!etudiant.Matricule) return false; // Ignore les lignes vides
+    
+    const matchesSearch = Object.values(etudiant).some(value =>
+      value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    // Filtre par niveau
+    const matchesNiveau = !selectedNiveau || etudiant.idNiveau === selectedNiveau;
+    
+    // Filtre par établissement
+    const matchesEtablissement = !selectedEtablissement || etudiant.Etablissement === selectedEtablissement;
+    
+    if (showMineursOnly && etudiant.Naissance) {
+      const dateNaissance = new Date(etudiant.Naissance);
+      const dateMajeure = new Date(dateNaissance);
+      dateMajeure.setFullYear(dateMajeure.getFullYear() + 18);
+      const isMineur = dateMajeure > new Date();
+      return matchesSearch && matchesNiveau && matchesEtablissement && isMineur;
+    }
+    
+    return matchesSearch && matchesNiveau && matchesEtablissement;
+  });
+
+  const resetFilters = async () => {
+    setSelectedNiveau("");
+    setSelectedEtablissement("");
+    setSearchQuery("");
+    setShowMineursOnly(false);
+    try {
+      const data = await getAllEtudiants();
+      setEtudiants(data);
+      setCurrentPage(1);
+      toast.success("Filtres réinitialisés");
+    } catch (error) {
+      console.error("Erreur lors du chargement des étudiants:", error);
+      toast.error("Erreur lors du chargement des étudiants");
+    }
+  };
+
+  const getUniqueEtablissements = () => {
+    const etablissements = new Set<string>();
+    etudiants.forEach(etudiant => {
+      if (etudiant.Etablissement) {
+        etablissements.add(etudiant.Etablissement);
+      }
+    });
+    return Array.from(etablissements).sort();
+  };
 
   // Fonction pour gérer le clic sur le bouton mineur
  const toggleMineursFilter = async () => {
@@ -281,28 +323,43 @@ const ComEtudiants = () => {
                   </button>
                   
                   <div className="custom-select">
-                    <select className="level-select">
+                    <select 
+                      className="level-select"
+                      value={selectedNiveau}
+                      onChange={(e) => setSelectedNiveau(e.target.value)}
+                    >
                       <option value="">Tous les niveaux</option>
-                      <option value="L1">Licence 1</option>
-                      <option value="L2">Licence 2</option>
-                      <option value="L3">Licence 3</option>
-                      <option value="M1">Master 1</option>
-                      <option value="M2">Master 2</option>
+                      {niveaux.map((niveau) => (
+                        <option key={niveau.idNiveau} value={niveau.idNiveau}>
+                          {niveau.Niveau}
+                        </option>
+                      ))}
                     </select>
                     <div className="select-arrow">▼</div>
                   </div>
                   
                   <div className="custom-select">
-                    <select className="institution-select">
+                    <select 
+                      className="institution-select"
+                      value={selectedEtablissement}
+                      onChange={(e) => setSelectedEtablissement(e.target.value)}
+                    >
                       <option value="">Tous les établissements</option>
-                      <option value="UCAD">UCAD</option>
-                      <option value="UGB">UGB</option>
-                      <option value="UVS">UVS</option>
-                      <option value="ESP">ESP</option>
-                      <option value="ENS">ENS</option>
+                      {getUniqueEtablissements().map(etablissement => (
+                        <option key={etablissement} value={etablissement}>
+                          {etablissement}
+                        </option>
+                      ))}
                     </select>
                     <div className="select-arrow">▼</div>
                   </div>
+
+                  <button className="reset-filter-btn" onClick={resetFilters}>
+  <svg className="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+    <path d="M3 3v5h5"/>
+  </svg>
+</button>
                 </div>
               </div>
 

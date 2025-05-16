@@ -6,6 +6,8 @@ export interface Paiement {
   AnneeUniversitaire: string;
   DateHeur?: string;
   NombreMois: number;
+  MontantEquipement?: number;
+  MontantMensuel?: number;
   NumeroCompte?: string;
   Matricule?: string;
   Nom?: string;
